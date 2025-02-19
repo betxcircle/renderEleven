@@ -241,25 +241,24 @@ if (referredBy) {
       from: 'odincirclex@gmail.com',
       to: newUser.email,
       subject: 'Confirm your Identity',
-      text: 'hello'
-    //   html: `
-    //   <div style="font-family: Arial, sans-serif; color: #333; background-color: #fff; padding: 20px;">
-    //     <img src="cid:logo" alt="Logo" style="width: 100px; height: 100px; border-radius: 50%; margin-bottom: 20px;" />
-    //     <p style="color: #000; margin-bottom: 10px; font-size: 16px">Hello ${newUser.fullName},</p>
-    //     <h2 style="color: #000; margin-bottom: 10px; font-size: 24px">Confirm Your Identity</h2>
-    //     <p style="font-size: 16px; margin-bottom: 20px;">Thank you for signing up to Odincircle. Here's your One Time Password to verify your account.</p>
-    //     <h3 style="font-size: 24px; color: #000; margin-bottom: 10px; background-color: aliceblue; padding: 20px 0; text-align: center";>${otp}</h3>
-    //     <p style="font-size: 16px; margin-bottom: 20px;">If you have any complaint please contact our support team immediately via in-app or email.</p>
-    //     <p style="font-size: 16px; margin-bottom: 20px;">support@odincirclegames.co</p>
-    //     <p style="font-size: 16px;">Please use this OTP to complete your registration process.</p>
-    //   </div>`, // HTML content with inline CSS styles
-    // attachments: [
-    //   {
-    //     filename: 'odincircle.png', // Name of the image file
-    //     path: '../../odincircle.png', // Path to the image file
-    //     cid: 'logo', // Unique ID for referencing the image in the HTML content
-    //   },
-    // ],
+      html: `
+      <div style="font-family: Arial, sans-serif; color: #333; background-color: #fff; padding: 20px;">
+        <img src="cid:logo" alt="Logo" style="width: 100px; height: 100px; border-radius: 50%; margin-bottom: 20px;" />
+        <p style="color: #000; margin-bottom: 10px; font-size: 16px">Hello ${newUser.fullName},</p>
+        <h2 style="color: #000; margin-bottom: 10px; font-size: 24px">Confirm Your Identity</h2>
+        <p style="font-size: 16px; margin-bottom: 20px;">Thank you for signing up to Odincircle. Here's your One Time Password to verify your account.</p>
+        <h3 style="font-size: 24px; color: #000; margin-bottom: 10px; background-color: aliceblue; padding: 20px 0; text-align: center";>${otp}</h3>
+        <p style="font-size: 16px; margin-bottom: 20px;">If you have any complaint please contact our support team immediately via in-app or email.</p>
+        <p style="font-size: 16px; margin-bottom: 20px;">support@odincirclegames.co</p>
+        <p style="font-size: 16px;">Please use this OTP to complete your registration process.</p>
+      </div>`, // HTML content with inline CSS styles
+    attachments: [
+      {
+        filename: 'odincircle.png', // Name of the image file
+        path: '../../odincircle.png', // Path to the image file
+        cid: 'logo', // Unique ID for referencing the image in the HTML content
+      },
+    ],
   };
   
 

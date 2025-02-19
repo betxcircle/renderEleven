@@ -342,9 +342,7 @@ async function sendOTPByEmail(newUser, otp) {
         </div>`, // HTML content with inline CSS styles
       attachments: [
         {
-          filename: 'odincircle.png', // Name of the image file
-          path: '../../odincircle.png', // Path to the image file
-          cid: 'logo', // Unique ID for referencing the image in the HTML content
+
         },
       ],
     };

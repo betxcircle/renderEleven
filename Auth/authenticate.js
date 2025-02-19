@@ -252,13 +252,7 @@ if (referredBy) {
         <p style="font-size: 16px; margin-bottom: 20px;">support@odincirclegames.co</p>
         <p style="font-size: 16px;">Please use this OTP to complete your registration process.</p>
       </div>`, // HTML content with inline CSS styles
-    attachments: [
-      {
-        filename: 'odincircle.png', // Name of the image file
-        path: '../../odincircle.png', // Path to the image file
-        cid: 'logo', // Unique ID for referencing the image in the HTML content
-      },
-    ],
+ 
   };
   
 
@@ -340,11 +334,7 @@ async function sendOTPByEmail(newUser, otp) {
           <p style="font-size: 16px; margin-bottom: 20px;">odincirclex@gmail.com</p>
           <p style="font-size: 16px;">Please use this OTP to complete your registration process.</p>
         </div>`, // HTML content with inline CSS styles
-      attachments: [
-        {
-
-        },
-      ],
+  
     };
 
       // Send the email

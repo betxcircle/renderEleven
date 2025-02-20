@@ -332,7 +332,7 @@ async function sendOTPByEmail(newUser, otp) {
            <!-- Header -->
       <div style="text-align: center; padding: 10px 0; border-bottom: 2px solid #000;">
         <h2 style="color: #000; margin: 0;">betxcircle</h2>
-        <p style="color: #666; font-size: 14px; margin: 0;">Reset Code</p>
+        <p style="color: #666; font-size: 14px; margin: 0;">Confirm Identity</p>
       </div>
           <p style="color: #000; margin-bottom: 10px; font-size: 16px">Hello ${newUser.fullName},</p>
           <h2 style="color: #000; margin-bottom: 10px; font-size: 24px">Confirm Your Identity</h2>

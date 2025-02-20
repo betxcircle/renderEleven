@@ -243,7 +243,11 @@ if (referredBy) {
       subject: 'Confirm your Identity',
       html: `
       <div style="font-family: Arial, sans-serif; color: #333; background-color: #fff; padding: 20px;">
-        <img src="cid:logo" alt="Logo" style="width: 100px; height: 100px; border-radius: 50%; margin-bottom: 20px;" />
+         <!-- Header -->
+      <div style="text-align: center; padding: 10px 0; border-bottom: 2px solid #000;">
+        <h2 style="color: #000; margin: 0;">betxcircle</h2>
+        <p style="color: #666; font-size: 14px; margin: 0;">Reset Code</p>
+      </div>
         <p style="color: #000; margin-bottom: 10px; font-size: 16px">Hello ${newUser.fullName},</p>
         <h2 style="color: #000; margin-bottom: 10px; font-size: 24px">Confirm Your Identity</h2>
         <p style="font-size: 16px; margin-bottom: 20px;">Thank you for signing up to Odincircle. Here's your One Time Password to verify your account.</p>
@@ -325,7 +329,11 @@ async function sendOTPByEmail(newUser, otp) {
         subject: 'Confirm your Identity',
         html: `
         <div style="font-family: Arial, sans-serif; color: #333; background-color: #fff; padding: 20px;">
-          <img src="cid:logo" alt="Logo" style="width: 100px; height: 100px; border-radius: 50%; margin-bottom: 20px;" />
+           <!-- Header -->
+      <div style="text-align: center; padding: 10px 0; border-bottom: 2px solid #000;">
+        <h2 style="color: #000; margin: 0;">betxcircle</h2>
+        <p style="color: #666; font-size: 14px; margin: 0;">Reset Code</p>
+      </div>
           <p style="color: #000; margin-bottom: 10px; font-size: 16px">Hello ${newUser.fullName},</p>
           <h2 style="color: #000; margin-bottom: 10px; font-size: 24px">Confirm Your Identity</h2>
           <p style="font-size: 16px; margin-bottom: 20px;">Thank you for signing up to betxcircle. Here's your One Time Password to verify your account.</p>

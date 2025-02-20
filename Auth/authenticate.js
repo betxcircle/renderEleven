@@ -1033,7 +1033,7 @@ router.post('/send-otptransaction', async (req, res) => {
 
 
 router.post('/verify-otpwithdraw', async (req, res) => {
-  const { userId, password, otp, totalAmount, amount, title, message, fullName } = req.body;
+  const { userId, otp, totalAmount, amount, title, message, fullName } = req.body;
 
   try {
     // Retrieve the OTP from the database
@@ -1048,11 +1048,6 @@ router.post('/verify-otpwithdraw', async (req, res) => {
       return res.status(400).send('User not found');
     }
 
-    // Check if the password is correct
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      return res.status(400).send('Invalid password');
-    }
 
     // Validate the withdrawal amount
     const withdrawalAmount = parseFloat(totalAmount);

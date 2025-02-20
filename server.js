@@ -19,6 +19,9 @@ const authenticateRouter = require('./Auth/authenticate'); // Import authenticat
 const app = express();
 app.use(express.json());
 
+// Enable trust proxy (important when running behind a proxy)
+app.set('trust proxy', 1);
+
 const cors = require('cors');
 
 const LOCALHOST1 = process.env.LOCALHOST1

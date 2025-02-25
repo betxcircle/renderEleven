@@ -319,7 +319,7 @@ async function sendOTPByEmail(newUser, otp) {
         service: 'gmail',
         auth: {
           user: 'odincirclex@gmail.com',
-          pass: 'otjt jjfb ooju khwk',
+          pass: 'xyqi telz pmxd evkl',
         },
       });
 
@@ -444,7 +444,7 @@ const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
     user: 'odincirclex@gmail.com',
-    pass: 'otjt jjfb ooju khwk',
+    pass: 'xyqi telz pmxd evkl',
   },
 });
 
@@ -958,7 +958,7 @@ const sendOTPEmail = async (email, otp) => {
     service: 'gmail',
     auth: {
       user: 'odincirclex@gmail.com',
-      pass: 'otjt jjfb ooju khwk',
+      pass: 'xyqi telz pmxd evkl',
     },
   });
 
@@ -1082,7 +1082,7 @@ router.post('/verify-otpwithdraw', async (req, res) => {
       service: 'gmail',
       auth: {
         user: 'odincirclex@gmail.com',
-        pass: 'otjt jjfb ooju khwk',
+        pass: 'xyqi telz pmxd evkl',
       },
     });
 
@@ -2349,14 +2349,14 @@ router.post('/api/verify-transaction', async (req, res) => {
     const transporter = nodemailer.createTransport({
       service: 'gmail', // or another email service like 'SendGrid', 'Outlook', etc.
       auth: {
-        user: process.env.EMAIL_USER, // Your email address (use environment variables for security)
-        pass: process.env.EMAIL_PASS, // Your email password
+        user: 'odincirclex@gmail.com', // Your email address (use environment variables for security)
+        pass: 'xyqi telz pmxd evkl', // Your email password
       },
     });
 
     // Prepare the email content
     const mailOptions = {
-      from: process.env.EMAIL_USER,
+      from: 'odincirclex@gmail.com',
       to: user.email, // Assuming the user model has an 'email' field
       subject: 'TopUp Successful',
       text: 'Transaction Receipt from ODINCIRCLEX LIMITED',

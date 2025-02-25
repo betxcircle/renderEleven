@@ -1728,15 +1728,15 @@ router.get('/winnerstoday', async (req, res) => {
 
 router.put('/withdrawAuth/:userId', async (req, res) => {
   const { userId } = req.params; 
-  const { bvn, nin, phone, lastName, firstName } = req.body; 
+  const { bvn, phone, lastName, firstName } = req.body; 
 
   try {
-    if (!bvn || !nin) {
-      return res.status(400).json({ message: 'BVN and NIN are required' });
+    if (!bvn) {
+      return res.status(400).json({ message: 'BVN is required' });
     }
 
-    if (bvn.length !== 11 || nin.length !== 11) {
-      return res.status(400).json({ message: 'BVN and NIN must each be 11 digits' });
+    if (bvn.length !== 11 ) {
+      return res.status(400).json({ message: 'BVN must be 11 digits' });
     }
 
     const user = await OdinCircledbModel.findById(userId);
@@ -1750,7 +1750,6 @@ router.put('/withdrawAuth/:userId', async (req, res) => {
       withdrawAuth = new WithdrawAuthModel({
         userId: user._id,
         bvn,
-        nin,
         phone,
         firstName,
         lastName
@@ -1758,7 +1757,6 @@ router.put('/withdrawAuth/:userId', async (req, res) => {
     } else {
       // If WithdrawAuth record exists, update BVN and NIN
       withdrawAuth.bvn = bvn;
-      withdrawAuth.nin = nin;
       withdrawAuth.phone = phone;
       withdrawAuth.firstName = firstName;
       withdrawAuth.lastName = lastName;

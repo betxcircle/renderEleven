@@ -148,7 +148,7 @@ router.post('/register',upload.single('image'), registrationLimiter, async (req,
     // Generate a random 4-digit OTP
     const otp = Math.floor(1000 + Math.random() * 9000);
 
-    console.log('expotoks:', expoPushToken);
+
     // Create a new user
     const newUser = await OdinCircledbModel.create({
       fullName: req.body.fullName,
@@ -227,50 +227,49 @@ if (referredBy) {
     });
    // console.log('OTP verification record created:', otpVerification);
 
-    // Send OTP to user's email using Nodemailer
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: 'odincirclex@gmail.com',
-        pass: 'xyqi telz pmxd evkl',
-      },
-    });
+// Function to send OTP to user's email
+async function sendOTPByEmail(newUser, otp) {
+  try {
+      // Create a nodemailer transporter
+      let transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: 'odincirclex@gmail.com',
+          pass: 'xyqi telz pmxd evkl',
+        },
+      });
 
- 
-    const mailOptions = {
-      from: 'odincirclex@gmail.com',
-      to: newUser.email,
-      subject: 'Confirm your Identity',
-      html: `
-      <div style="font-family: Arial, sans-serif; color: #333; background-color: #fff; padding: 20px;">
-         <!-- Header -->
+      const mailOptions = {
+        from: 'odincirclex@gmail.com',
+        to: newUser.email,
+        subject: 'Confirm your Identity',
+        html: `
+        <div style="font-family: Arial, sans-serif; color: #333; background-color: #fff; padding: 20px;">
+           <!-- Header -->
       <div style="text-align: center; padding: 10px 0; border-bottom: 2px solid #000;">
         <h2 style="color: #000; margin: 0;">betxcircle</h2>
-        <p style="color: #666; font-size: 14px; margin: 0;">Reset Code</p>
+        <p style="color: #666; font-size: 14px; margin: 0;">Confirm Identity</p>
       </div>
-        <p style="color: #000; margin-bottom: 10px; font-size: 16px">Hello ${newUser.fullName},</p>
-        <h2 style="color: #000; margin-bottom: 10px; font-size: 24px">Confirm Your Identity</h2>
-        <p style="font-size: 16px; margin-bottom: 20px;">Thank you for signing up to Odincircle. Here's your One Time Password to verify your account.</p>
-        <h3 style="font-size: 24px; color: #000; margin-bottom: 10px; background-color: aliceblue; padding: 20px 0; text-align: center";>${otp}</h3>
-        <p style="font-size: 16px; margin-bottom: 20px;">If you have any complaint please contact our support team immediately via in-app or email.</p>
-        <p style="font-size: 16px; margin-bottom: 20px;">support@odincirclegames.co</p>
-        <p style="font-size: 16px;">Please use this OTP to complete your registration process.</p>
-      </div>`, // HTML content with inline CSS styles
- 
-  };
+          <p style="color: #000; margin-bottom: 10px; font-size: 16px">Hello ${newUser.fullName},</p>
+          <h2 style="color: #000; margin-bottom: 10px; font-size: 24px">Confirm Your Identity</h2>
+          <p style="font-size: 16px; margin-bottom: 20px;">Thank you for signing up to betxcircle. Here's your One Time Password to verify your account.</p>
+          <h3 style="font-size: 24px; color: #000; margin-bottom: 10px; background-color: aliceblue; padding: 20px 0; text-align: center";>${otp}</h3>
+          <p style="font-size: 16px; margin-bottom: 20px;">If you have any complaint please contact our support team immediately via in-app or email.</p>
+          <p style="font-size: 16px; margin-bottom: 20px;">odincirclex@gmail.com</p>
+          <p style="font-size: 16px;">Please use this OTP to complete your registration process.</p>
+        </div>`, // HTML content with inline CSS styles
   
+    };
 
-    //transporter.sendMail(mailOptions);
+      // Send the email
+      await transporter.sendMail(mailOptions);
 
-// Send email
-transporter.sendMail(mailOptions, (error, info) => {
-  console.log('OTP sent to user:', newUser.email);
-  if (error) {
-    console.error('Error sending email:', error);
-  } else {
-    console.log('Email sent:', info.response);
+      console.log('OTP email sent successfully.');
+  } catch (error) {
+      console.error('Error sending OTP email:', error.message);
+      throw new Error('Failed to send OTP email.');
   }
-});
+}
 
       // Create a new wallet for the user
       const newWallet = await WalletModel.create({

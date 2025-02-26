@@ -232,7 +232,7 @@ if (referredBy) {
       service: "gmail",
       auth: {
         user: 'odincirclex@gmail.com',
-        pass: 'otjt jjfb ooju khwk',
+        pass: 'xyqi telz pmxd evkl',
       },
     });
 

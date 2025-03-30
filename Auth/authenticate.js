@@ -75,6 +75,30 @@ const registrationLimiter = rateLimit({
   message: 'Too many registration attempts from this IP, please try again after 5 minutes',
 });
 
+const PAYSTACK_SECRET_KEY = 'pk_live_6f88246fd4d0c4102e8b59d478534faabd60d84e';
+
+
+router.post('/paystack/initialize', async (req, res) => {
+  const { email, amount } = req.body;
+  const paystackAmount = amount * 100; // Convert to kobo
+
+  console.log("Received payment request:", { email, amount });
+
+  try {
+    const response = await axios.post(
+      'https://api.paystack.co/transaction/initialize',
+      { email, amount: paystackAmount },
+      { headers: { Authorization: `Bearer ${PAYSTACK_SECRET_KEY}` } }
+    );
+
+    console.log("Paystack response:", response.data);
+
+    res.json(response.data);
+  } catch (error) {
+    console.error("Error initializing transaction:", error.response ? error.response.data : error.message);
+    res.status(500).json({ error: 'Transaction initialization failed' });
+  }
+});
 
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;

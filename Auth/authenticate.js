@@ -84,7 +84,7 @@ router.post('/paystack/initialize', async (req, res) => {
   const { email, amount } = req.body;
   const paystackAmount = Number(amount) * 100; // Convert to kobo
 
-  console.log("Received payment request:", { email, amount });
+  console.log("Received payment request:", { email, amount, paystackAmount });
 
   if (isNaN(paystackAmount) || paystackAmount <= 0) {
     return res.status(400).json({ error: "Invalid amount" });
@@ -98,7 +98,11 @@ router.post('/paystack/initialize', async (req, res) => {
         amount: paystackAmount,
         callback_url: "betxcircle://paystack-success", // Deep linking URL
       },
-      { headers: { Authorization: `Bearer ${PAYSTACK_SECRET_KEY}` } }
+     { 
+    headers: { 
+      Authorization: `Bearer ${PAYSTACK_SECRET_KEY}`,
+      "Content-Type": "application/json" // Explicitly set JSON
+    } 
     );
 
     console.log("Paystack response:", response.data); // Log full response

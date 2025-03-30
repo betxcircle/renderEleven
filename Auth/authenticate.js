@@ -88,7 +88,10 @@ router.post('/paystack/initialize', async (req, res) => {
   try {
     const response = await axios.post(
       'https://api.paystack.co/transaction/initialize',
-      { email, amount: paystackAmount },
+      { email, 
+       amount: paystackAmount ,
+       callback_url: "https://rendereleven.onrender.com/paystack/callback" // ✅ Change to an actual callback route
+      },
       { headers: { Authorization: `Bearer ${PAYSTACK_SECRET_KEY}` } }
     );
 

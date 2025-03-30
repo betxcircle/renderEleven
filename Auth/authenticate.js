@@ -96,6 +96,7 @@ router.post('/paystack/initialize', async (req, res) => {
       {
         email,
         amount: paystackAmount,
+        callback_url: "betxcircle://paystack-success", // Deep linking URL
       },
       { headers: { Authorization: `Bearer ${PAYSTACK_SECRET_KEY}` } }
     );

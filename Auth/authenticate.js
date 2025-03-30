@@ -80,7 +80,7 @@ const PAYSTACK_SECRET_KEY = 'sk_live_99e08a1ad086cd7380d6b6251e25ec409a71750b';
 
 
 router.post('/paystack/initialize', async (req, res) => {
-  const { email, amount } = req.body;
+  const { email, amount, userId } = req.body;
   const paystackAmount = amount * 100; // Convert to kobo
 
   console.log("Received payment request:", { email, amount });
@@ -91,6 +91,7 @@ router.post('/paystack/initialize', async (req, res) => {
       { email, 
        amount: paystackAmount ,
        callback_url: "https://rendereleven.onrender.com/paystack/callback" // ✅ Change to an actual callback route
+       metadata: { userId }, // ✅ Attach userId to be retrieved later
       },
       { headers: { Authorization: `Bearer ${PAYSTACK_SECRET_KEY}` } }
     );
@@ -114,27 +115,41 @@ router.get("/paystack/callback", async (req, res) => {
 
     // Verify the transaction
     const response = await axios.get(`https://api.paystack.co/transaction/verify/${reference}`, {
-      headers: { Authorization: `Bearer ${PAYSTACK_SECRET}` },
+      headers: { Authorization: `Bearer ${PAYSTACK_SECRET_KEY}` },
     });
 
     const { status, data } = response.data;
     if (status && data.status === "success") {
       console.log("Payment verified:", data);
 
-      // ✅ Update your database (mark order as paid, credit user, etc.)
-      // Example: await updatePaymentStatus(data.reference, "success");
+      // ✅ Extract userId from metadata
+      const userId = data.metadata?.userId;
+      if (!userId) {
+        console.error("No userId found in metadata.");
+        return res.redirect("https://betxcircle.com");
+      }
 
-      return res.redirect(`https://yourfrontend.com/payment-success?reference=${reference}`);
+      // ✅ Automatically call the verification route on the backend
+      const verifyResponse = await axios.post(
+        "https://rendereleven.onrender.com/paystack/verify",
+        { reference, userId },
+        { headers: { "Content-Type": "application/json" } }
+      );
+
+      console.log("Backend verification response:", verifyResponse.data);
+
+      return res.redirect(`https://betxcircle.com/payment-success?reference=${reference}`);
     } else {
-      return res.redirect(`https://yourfrontend.com/payment-failed`);
+      return res.redirect("https://betxcircle.com/payment-failed");
     }
   } catch (error) {
     console.error("Error verifying transaction:", error);
-    return res.redirect(`https://yourfrontend.com/payment-failed`);
+    return res.redirect("https://betxcircle.com/payment-failed");
   }
 });
 
 
+ // Verification route (Called by the callback automatically)
 router.post("/paystack/verify", async (req, res) => {
   const { reference, userId } = req.body;
 
@@ -146,56 +161,52 @@ router.post("/paystack/verify", async (req, res) => {
     );
 
     const transactionDetails = response.data.data;
-
     if (!transactionDetails) {
       return res.status(400).json({ message: "Invalid transaction data" });
     }
 
-    // Find the user in the database
-    const user = await OdinCircledbModel.findById(userId);
-    if (!user) {
+    if (transactionDetails.status !== "success") {
+      return res.status(400).json({ message: "Transaction verification failed" });
+    }
+
+    const amount = parseFloat(transactionDetails.amount) / 100; // Convert kobo to NGN
+    if (isNaN(amount) || amount <= 0) {
+      return res.status(400).json({ message: "Invalid transaction amount" });
+    }
+
+    // Find and update the user's wallet balance
+    const updatedUser = await OdinCircledbModel.findOneAndUpdate(
+      { _id: userId },
+      { $inc: { "wallet.balance": amount } },
+      { new: true }
+    );
+
+    if (!updatedUser) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Check if the transaction was successful
-    if (transactionDetails.status === "success") {
-      const amount = parseFloat(transactionDetails.amount) / 100; // Convert kobo to NGN
+    // Save transaction record
+    const newTopUp = new TopUpModel({
+      userId: updatedUser._id,
+      amount: amount,
+      transactionId: transactionDetails.id,
+      txRef: transactionDetails.reference,
+      email: transactionDetails.customer.email,
+    });
 
-      if (!isNaN(amount) && amount > 0) {
-        // Update user's wallet balance
-        await OdinCircledbModel.updateOne(
-          { _id: user._id },
-          { $inc: { "wallet.balance": amount } }
-        );
-      } else {
-        console.error("Invalid transaction amount:", amount);
-        return res.status(400).json({ message: "Invalid transaction amount" });
-      }
+    await newTopUp.save();
 
-      // Save the transaction record in TopUpModel
-      const newTopUp = new TopUpModel({
-        userId: user._id,
-        amount: amount,
-        transactionId: transactionDetails.id,
-        txRef: transactionDetails.reference,
-        email: transactionDetails.customer.email,
-      });
-
-      await newTopUp.save();
-
-      return res.json({
-        status: true,
-        message: "Transaction verified and balance updated",
-        newBalance: user.wallet.balance + amount,
-      });
-    } else {
-      return res.status(400).json({ message: "Transaction verification failed" });
-    }
+    return res.json({
+      status: true,
+      message: "Transaction verified and balance updated",
+      newBalance: updatedUser.wallet.balance,
+    });
   } catch (error) {
     console.error("Error verifying transaction:", error.message);
     return res.status(500).json({ message: "Internal server error" });
   }
 });
+
 
 
 router.post('/login', async (req, res) => {

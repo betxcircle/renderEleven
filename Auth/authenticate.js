@@ -78,7 +78,6 @@ const registrationLimiter = rateLimit({
 
 const PAYSTACK_SECRET_KEY = 'sk_live_99e08a1ad086cd7380d6b6251e25ec409a71750b';
 
-
 router.post('/paystack/initialize', async (req, res) => {
   const { email, amount } = req.body;
   const paystackAmount = amount * 100; // Convert to kobo
@@ -88,18 +87,50 @@ router.post('/paystack/initialize', async (req, res) => {
   try {
     const response = await axios.post(
       'https://api.paystack.co/transaction/initialize',
-      { email, amount: paystackAmount },
+      {
+        email,
+        amount: paystackAmount,
+        callback_url: "https://betxcircle.com/paystack/callback" // ✅ Add callback URL
+      },
       { headers: { Authorization: `Bearer ${PAYSTACK_SECRET_KEY}` } }
     );
 
     console.log("Paystack response:", response.data);
-
-    res.json(response.data);
+    res.json({ checkoutUrl: response.data.data.authorization_url });
   } catch (error) {
     console.error("Error initializing transaction:", error.response ? error.response.data : error.message);
     res.status(500).json({ error: 'Transaction initialization failed' });
   }
 });
+
+// Callback URL for Paystack
+router.get("/paystack/callback", async (req, res) => {
+  try {
+    const { reference } = req.query;
+    if (!reference) return res.status(400).json({ error: "No reference provided" });
+
+    // Verify the transaction
+    const response = await axios.get(`https://api.paystack.co/transaction/verify/${reference}`, {
+      headers: { Authorization: `Bearer ${PAYSTACK_SECRET}` },
+    });
+
+    const { status, data } = response.data;
+    if (status && data.status === "success") {
+      console.log("Payment verified:", data);
+
+      // ✅ Update your database (mark order as paid, credit user, etc.)
+      // Example: await updatePaymentStatus(data.reference, "success");
+
+      return res.redirect(`https://yourfrontend.com/payment-success?reference=${reference}`);
+    } else {
+      return res.redirect(`https://yourfrontend.com/payment-failed`);
+    }
+  } catch (error) {
+    console.error("Error verifying transaction:", error);
+    return res.redirect(`https://yourfrontend.com/payment-failed`);
+  }
+});
+
 
 router.post("/paystack/verify", async (req, res) => {
   const { reference, userId } = req.body;

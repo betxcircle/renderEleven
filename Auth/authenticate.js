@@ -90,8 +90,8 @@ router.post('/paystack/initialize', async (req, res) => {
       'https://api.paystack.co/transaction/initialize',
       { email, 
        amount: paystackAmount ,
-       callback_url: "https://rendereleven.onrender.com/paystack/callback" // ✅ Change to an actual callback route
-       metadata: { userId }, // ✅ Attach userId to be retrieved later
+       callback_url: "https://rendereleven.onrender.com/paystack/callback", // ✅ Change to an actual callback route
+       metadata: { userId } // ✅ Attach userId to be retrieved later
       },
       { headers: { Authorization: `Bearer ${PAYSTACK_SECRET_KEY}` } }
     );

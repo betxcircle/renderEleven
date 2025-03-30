@@ -78,11 +78,17 @@ const registrationLimiter = rateLimit({
 
 const PAYSTACK_SECRET_KEY = 'sk_live_99e08a1ad086cd7380d6b6251e25ec409a71750b';
 
+
+
 router.post('/paystack/initialize', async (req, res) => {
   const { email, amount } = req.body;
-  const paystackAmount = amount * 100; // Convert to kobo
+  const paystackAmount = Number(amount) * 100; // Convert to kobo
 
   console.log("Received payment request:", { email, amount });
+
+  if (isNaN(paystackAmount) || paystackAmount <= 0) {
+    return res.status(400).json({ error: "Invalid amount" });
+  }
 
   try {
     const response = await axios.post(
@@ -90,18 +96,30 @@ router.post('/paystack/initialize', async (req, res) => {
       {
         email,
         amount: paystackAmount,
-        callback_url: "https://paystackwebview/paystack/callback" // ✅ Add callback URL
       },
       { headers: { Authorization: `Bearer ${PAYSTACK_SECRET_KEY}` } }
     );
 
-    console.log("Paystack response:", response.data);
+    console.log("Paystack response:", response.data); // Log full response
+
+    if (!response.data || !response.data.data || !response.data.data.authorization_url) {
+      return res.status(500).json({ error: "Invalid response from Paystack" });
+    }
+
     res.json({ checkoutUrl: response.data.data.authorization_url });
+
   } catch (error) {
-    console.error("Error initializing transaction:", error.response ? error.response.data : error.message);
-    res.status(500).json({ error: 'Transaction initialization failed' });
+    console.error(
+      "Error initializing transaction:",
+      error.response ? error.response.data : error.message
+    );
+    res.status(500).json({
+      error: "Transaction initialization failed",
+      details: error.response ? error.response.data : error.message,
+    });
   }
 });
+
 
 // Callback URL for Paystack
 router.get("/paystack/callback", async (req, res) => {

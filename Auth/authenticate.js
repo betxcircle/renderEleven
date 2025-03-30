@@ -90,7 +90,7 @@ router.post('/paystack/initialize', async (req, res) => {
       {
         email,
         amount: paystackAmount,
-        callback_url: "https://betxcircle.com/paystack/callback" // ✅ Add callback URL
+        callback_url: "https://paystackwebview/paystack/callback" // ✅ Add callback URL
       },
       { headers: { Authorization: `Bearer ${PAYSTACK_SECRET_KEY}` } }
     );

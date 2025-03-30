@@ -81,52 +81,23 @@ const PAYSTACK_SECRET_KEY = 'sk_live_99e08a1ad086cd7380d6b6251e25ec409a71750b';
 
 router.post('/paystack/initialize', async (req, res) => {
   const { email, amount } = req.body;
+  const paystackAmount = amount * 100; // Convert to kobo
 
-  if (!email || !amount) {
-    return res.status(400).json({ error: "Email and amount are required" });
-  }
-
-  const paystackAmount = Number(amount) * 100; // Convert to kobo
-
-  if (isNaN(paystackAmount) || paystackAmount <= 0) {
-    return res.status(400).json({ error: "Invalid amount" });
-  }
-
-  console.log("🔹 Payment Request:", { email, amount, paystackAmount });
+  console.log("Received payment request:", { email, amount });
 
   try {
     const response = await axios.post(
-      "https://api.paystack.co/transaction/initialize",
-      {
-        email,
-        amount: paystackAmount,
-        callback_url: "betxcircle://paystack-success"
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${PAYSTACK_SECRET_KEY}`,
-          "Content-Type": "application/json"
-        }
-      }
+      'https://api.paystack.co/transaction/initialize',
+      { email, amount: paystackAmount },
+      { headers: { Authorization: `Bearer ${PAYSTACK_SECRET_KEY}` } }
     );
 
-    console.log("✅ Paystack Response:", response.data);
+    console.log("Paystack response:", response.data);
 
-    if (!response.data || !response.data.data || !response.data.data.authorization_url) {
-      return res.status(500).json({ error: "Invalid response from Paystack" });
-    }
-
-    res.json({ checkoutUrl: response.data.data.authorization_url });
-
+    res.json(response.data);
   } catch (error) {
-    console.error(
-      "❌ Transaction Initialization Error:",
-      error.response?.data || error.message
-    );
-    res.status(500).json({
-      error: "Transaction initialization failed",
-      details: error.response?.data || error.message,
-    });
+    console.error("Error initializing transaction:", error.response ? error.response.data : error.message);
+    res.status(500).json({ error: 'Transaction initialization failed' });
   }
 });
 

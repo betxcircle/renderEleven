@@ -101,6 +101,69 @@ router.post('/paystack/initialize', async (req, res) => {
   }
 });
 
+router.post("/paystack/verify", async (req, res) => {
+  const { reference, userId } = req.body;
+
+  try {
+    // Verify the transaction with Paystack
+    const response = await axios.get(
+      `https://api.paystack.co/transaction/verify/${reference}`,
+      { headers: { Authorization: `Bearer ${PAYSTACK_SECRET_KEY}` } }
+    );
+
+    const transactionDetails = response.data.data;
+
+    if (!transactionDetails) {
+      return res.status(400).json({ message: "Invalid transaction data" });
+    }
+
+    // Find the user in the database
+    const user = await OdinCircledbModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Check if the transaction was successful
+    if (transactionDetails.status === "success") {
+      const amount = parseFloat(transactionDetails.amount) / 100; // Convert kobo to NGN
+
+      if (!isNaN(amount) && amount > 0) {
+        // Update user's wallet balance
+        await OdinCircledbModel.updateOne(
+          { _id: user._id },
+          { $inc: { "wallet.balance": amount } }
+        );
+      } else {
+        console.error("Invalid transaction amount:", amount);
+        return res.status(400).json({ message: "Invalid transaction amount" });
+      }
+
+      // Save the transaction record in TopUpModel
+      const newTopUp = new TopUpModel({
+        userId: user._id,
+        amount: amount,
+        transactionId: transactionDetails.id,
+        txRef: transactionDetails.reference,
+        email: transactionDetails.customer.email,
+      });
+
+      await newTopUp.save();
+
+      return res.json({
+        status: true,
+        message: "Transaction verified and balance updated",
+        newBalance: user.wallet.balance + amount,
+      });
+    } else {
+      return res.status(400).json({ message: "Transaction verification failed" });
+    }
+  } catch (error) {
+    console.error("Error verifying transaction:", error.message);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 

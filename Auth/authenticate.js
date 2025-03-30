@@ -76,7 +76,7 @@ const registrationLimiter = rateLimit({
   message: 'Too many registration attempts from this IP, please try again after 5 minutes',
 });
 
-const PAYSTACK_SECRET_KEY = 'pk_live_6f88246fd4d0c4102e8b59d478534faabd60d84e';
+const PAYSTACK_SECRET_KEY = 'sk_live_99e08a1ad086cd7380d6b6251e25ec409a71750b';
 
 
 router.post('/paystack/initialize', async (req, res) => {

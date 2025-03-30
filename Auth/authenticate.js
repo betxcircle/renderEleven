@@ -98,11 +98,12 @@ router.post('/paystack/initialize', async (req, res) => {
         amount: paystackAmount,
         callback_url: "betxcircle://paystack-success", // Deep linking URL
       },
-     { 
-    headers: { 
-      Authorization: `Bearer ${PAYSTACK_SECRET_KEY}`,
-      "Content-Type": "application/json" // Explicitly set JSON
-    } 
+      { // ✅ Correct placement of headers
+        headers: { 
+          Authorization: `Bearer ${PAYSTACK_SECRET_KEY}`,
+          "Content-Type": "application/json" // Explicitly set JSON
+        } 
+      } // ✅ Closing bracket moved here
     );
 
     console.log("Paystack response:", response.data); // Log full response
@@ -124,6 +125,7 @@ router.post('/paystack/initialize', async (req, res) => {
     });
   }
 });
+
 
 
 // Callback URL for Paystack

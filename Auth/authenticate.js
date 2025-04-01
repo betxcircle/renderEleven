@@ -584,26 +584,61 @@ router.get('/referral/:userId', async (req, res) => {
   }
 });
 
+router.get('/getBankDetails/:userId', async (req, res) => {
+  try {
+      const { userId } = req.params;
+      const bankDetails = await BankModel.findOne({ userId });
+      if (!bankDetails) {
+          return res.status(200).json({ message: 'No bank details found', data: null });
+      }
+      res.status(200).json(bankDetails);
+  } catch (error) {
+      console.error('Error fetching bank details:', error);
+      res.status(500).json({ message: 'Internal server error' });
+  }
+});
 
+
+// Update bank details
 // Update bank details
 router.put('/updateBankDetails/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
     const { bankName, accountName, accountNumber } = req.body;
 
+    console.log("Request data: ", req.body); // Log incoming request data
+
+    // Validate input
+    if (!bankName || !accountName || !accountNumber) {
+      return res.status(400).json({ message: 'All fields are required' });
+    }
+
+    // Find the user
     const user = await OdinCircledbModel.findById(userId);
 
-    if (user) {
-      user.bankDetails = { bankName, accountName, accountNumber };
-      await user.save();
-      res.status(200).json({ message: 'Bank details updated successfully' });
-    } else {
-      res.status(404).json({ message: 'User not found' });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
     }
+
+    // Always update the bank details in BankModel (create or update)
+    await BankModel.findOneAndUpdate(
+      { userId }, // Find by userId
+      { bankName, accountName, accountNumber }, // Update these fields
+      { upsert: true, new: true } // upsert creates a new document if it doesn't exist
+    );
+
+    // Update the user with new bank details (optional)
+    user.bankDetails = { bankName, accountName, accountNumber }; // You can choose to update this as well
+    await user.save();
+
+    res.status(200).json({ message: 'Bank details updated successfully' });
   } catch (error) {
+    console.error("Error updating bank details: ", error); // Log any errors
     res.status(500).json({ message: 'Failed to update bank details', error });
   }
 });
+
+
 
 
 router.post("/verifyEmailAndOTP", async (req, res) => {
@@ -1474,19 +1509,6 @@ router.get('/check-fullname', async (req, res) => {
 
 
 
-router.get('/getBankDetails/:userId', async (req, res) => {
-  try {
-      const { userId } = req.params;
-      const bankDetails = await BankModel.findOne({ userId });
-      if (!bankDetails) {
-          return res.status(200).json({ message: 'No bank details found', data: null });
-      }
-      res.status(200).json(bankDetails);
-  } catch (error) {
-      console.error('Error fetching bank details:', error);
-      res.status(500).json({ message: 'Internal server error' });
-  }
-});
 
 
 // Check balance route

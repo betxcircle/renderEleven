@@ -149,6 +149,41 @@ router.post("/paystack/withdraw", async (req, res) => {
   }
 });
 
+// Finalize Withdrawal Route
+router.post("/paystack/finalize-withdrawal", async (req, res) => {
+  const { transfer_code, otp } = req.body;
+
+  if (!transfer_code || !otp) {
+    return res.status(400).json({ error: "Transfer code and OTP are required" });
+  }
+
+  try {
+    // Send OTP and transfer code to Paystack to finalize the withdrawal
+    const response = await axios.post(
+      `${PAYSTACK_BASE_URL}/transfer/finalize_transfer`,
+      {
+        transfer_code,
+        otp,
+      },
+      { headers: paystackHeaders }
+    );
+
+    // Check if the transfer is successful
+    if (response.data.status === "success") {
+      return res.json({
+        success: true,
+        message: "Withdrawal successfully completed.",
+      });
+    } else {
+      return res.status(400).json({
+        error: "OTP verification failed. Please try again.",
+      });
+    }
+  } catch (error) {
+    console.error("Error finalizing transfer:", error.response?.data || error);
+    return res.status(500).json({ error: "Failed to finalize withdrawal" });
+  }
+});
 
 
 router.post('/paystack/initialize', async (req, res) => {

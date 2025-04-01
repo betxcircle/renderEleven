@@ -79,6 +79,78 @@ const registrationLimiter = rateLimit({
 const PAYSTACK_SECRET_KEY = 'sk_live_99e08a1ad086cd7380d6b6251e25ec409a71750b';
 
 
+const PAYSTACK_BASE_URL = "https://api.paystack.co";
+
+const paystackHeaders = {
+  Authorization: `Bearer ${PAYSTACK_SECRET_KEY}`,
+  "Content-Type": "application/json",
+};
+
+router.post("/paystack/withdraw", async (req, res) => {
+  const { name, account_number, bank_name, amount, currency } = req.body;
+
+  if (!name || !account_number || !bank_name || !amount) {
+    return res.status(400).json({ error: "All fields are required" });
+  }
+
+  try {
+    // 1️⃣ Fetch bank code
+    const bankResponse = await axios.get(`${PAYSTACK_BASE_URL}/bank`, { headers: paystackHeaders });
+    const bank = bankResponse.data.data.find((b) => b.name.toLowerCase() === bank_name.toLowerCase());
+
+    if (!bank) {
+      return res.status(400).json({ error: "Bank not found" });
+    }
+
+    // 2️⃣ Create recipient
+    const recipientResponse = await axios.post(
+      `${PAYSTACK_BASE_URL}/transferrecipient`,
+      {
+        type: "nuban",
+        name,
+        account_number,
+        bank_code: bank.code,
+        currency: currency || "NGN",
+      },
+      { headers: paystackHeaders }
+    );
+
+    const recipient_code = recipientResponse.data.data.recipient_code;
+
+    // 3️⃣ Initiate transfer
+    const transferResponse = await axios.post(
+      `${PAYSTACK_BASE_URL}/transfer`,
+      {
+        source: "balance",
+        amount: parseInt(amount) * 100, // Convert amount to kobo
+        recipient: recipient_code,
+        reason: "Withdrawal",
+      },
+      { headers: paystackHeaders }
+    );
+
+    // 4️⃣ Check if OTP is required
+    if (transferResponse.data.data.status === "otp") {
+      return res.json({
+        success: true,
+        message: "OTP required to finalize transfer",
+        transfer_code: transferResponse.data.data.transfer_code,
+      });
+    }
+
+    // ✅ If no OTP is required, transfer is completed
+    res.json({
+      success: true,
+      message: "Withdrawal successfully completed",
+    });
+  } catch (error) {
+    console.error("Error in withdrawal:", error.response?.data || error);
+    res.status(500).json({ error: "Withdrawal process failed" });
+  }
+});
+
+
+
 router.post('/paystack/initialize', async (req, res) => {
   const { email, amount, userId } = req.body;
   const paystackAmount = amount * 100; // Convert to kobo

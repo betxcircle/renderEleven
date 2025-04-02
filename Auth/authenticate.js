@@ -166,7 +166,7 @@ router.post("/paystack/withdraw", async (req, res) => {
     );
 
     // Check if the transfer is successful
-    if (response.data.status === "success") {
+    if (response.data.status === "true" && response.data.data.status === "pending") {
       console.log("Transfer successful, proceeding with wallet deduction...");
 
       // Fetch user

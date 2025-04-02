@@ -150,7 +150,9 @@ router.post("/paystack/withdraw", async (req, res) => {
 });
 
 
-    router.post("/paystack/finalize-withdrawal", async (req, res) => {
+
+   
+     router.post("/paystack/finalize-withdrawal", async (req, res) => {
   const { transfer_code, otp, userId, amount, fullName } = req.body;
 
   if (!transfer_code || !otp || !userId || !amount || !fullName) {
@@ -165,12 +167,14 @@ router.post("/paystack/withdraw", async (req, res) => {
       { headers: paystackHeaders }
     );
 
-    // Check if the transfer is successful
-    if (response.data.status === "true" && response.data.data.status === "pending") {
-      console.log("Transfer successful, proceeding with wallet deduction...");
+    console.log("Paystack Response:", response.data); // Log the full response
+
+    // Check if the transfer was at least queued
+    if (response.data.status === true && response.data.data.status === "pending") {
+      console.log("Transfer is pending, proceeding with wallet deduction...");
 
       // Fetch user
-      const user = await UserModel.findById(userId);
+      const user = await OdinCircledbModel.findById(userId);
       if (!user) {
         console.error("User not found:", userId);
         return res.status(404).json({ error: "User not found" });
@@ -182,7 +186,7 @@ router.post("/paystack/withdraw", async (req, res) => {
         return res.status(500).json({ error: "User wallet not available" });
       }
 
-      // Convert amount to a number (if it's coming as a string)
+      // Convert amount to a number
       const withdrawalAmount = Number(amount);
       if (isNaN(withdrawalAmount) || withdrawalAmount <= 0) {
         console.error("Invalid withdrawal amount:", amount);
@@ -206,7 +210,7 @@ router.post("/paystack/withdraw", async (req, res) => {
         userId,
         amount: withdrawalAmount,
         fullName,
-        WithdrawStatus: "pending",
+        WithdrawStatus: "pending", // Still pending since Paystack hasn't completed it
         date: new Date(),
       });
       await transaction.save();
@@ -215,7 +219,7 @@ router.post("/paystack/withdraw", async (req, res) => {
 
       return res.json({
         success: true,
-        message: "Withdrawal successfully completed.",
+        message: "Withdrawal request has been queued successfully.",
       });
     } else {
       console.error("OTP verification failed:", response.data);
@@ -226,6 +230,7 @@ router.post("/paystack/withdraw", async (req, res) => {
     return res.status(500).json({ error: "Failed to finalize withdrawal" });
   }
 });
+
 
 
 router.post('/paystack/initialize', async (req, res) => {

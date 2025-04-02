@@ -149,7 +149,8 @@ router.post("/paystack/withdraw", async (req, res) => {
   }
 });
 
-router.post("/paystack/finalize-withdrawal", async (req, res) => {
+
+    router.post("/paystack/finalize-withdrawal", async (req, res) => {
   const { transfer_code, otp, userId, amount, fullName } = req.body;
 
   if (!transfer_code || !otp || !userId || !amount || !fullName) {
@@ -166,30 +167,58 @@ router.post("/paystack/finalize-withdrawal", async (req, res) => {
 
     // Check if the transfer is successful
     if (response.data.status === "success") {
-      // Deduct the amount from the user's wallet
-      const user = await OdincircledbModel.findById(userId);
+      console.log("Transfer successful, proceeding with wallet deduction...");
+
+      // Fetch user
+      const user = await UserModel.findById(userId);
       if (!user) {
+        console.error("User not found:", userId);
         return res.status(404).json({ error: "User not found" });
       }
 
-      user.wallet.cashoutbalance -= amount;
+      // Ensure wallet exists
+      if (!user.wallet || typeof user.wallet.cashoutbalance !== "number") {
+        console.error("User wallet not found or invalid:", user.wallet);
+        return res.status(500).json({ error: "User wallet not available" });
+      }
+
+      // Convert amount to a number (if it's coming as a string)
+      const withdrawalAmount = Number(amount);
+      if (isNaN(withdrawalAmount) || withdrawalAmount <= 0) {
+        console.error("Invalid withdrawal amount:", amount);
+        return res.status(400).json({ error: "Invalid withdrawal amount" });
+      }
+
+      // Check if user has enough balance
+      if (user.wallet.cashoutbalance < withdrawalAmount) {
+        console.error("Insufficient balance:", user.wallet.cashoutbalance, "Requested:", withdrawalAmount);
+        return res.status(400).json({ error: "Insufficient balance" });
+      }
+
+      // Deduct the amount from the wallet
+      user.wallet.cashoutbalance -= withdrawalAmount;
       await user.save();
+
+      console.log(`New balance after withdrawal: ${user.wallet.cashoutbalance}`);
 
       // Save the transaction record
       const transaction = new DebitModel({
         userId,
-        amount,
+        amount: withdrawalAmount,
         fullName,
         WithdrawStatus: "pending",
         date: new Date(),
       });
       await transaction.save();
 
+      console.log("Transaction saved successfully:", transaction);
+
       return res.json({
         success: true,
         message: "Withdrawal successfully completed.",
       });
     } else {
+      console.error("OTP verification failed:", response.data);
       return res.status(400).json({ error: "OTP verification failed. Please try again." });
     }
   } catch (error) {
@@ -197,7 +226,6 @@ router.post("/paystack/finalize-withdrawal", async (req, res) => {
     return res.status(500).json({ error: "Failed to finalize withdrawal" });
   }
 });
-
 
 
 router.post('/paystack/initialize', async (req, res) => {

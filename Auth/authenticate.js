@@ -96,7 +96,9 @@ router.post("/paystack/withdraw", async (req, res) => {
   try {
     // 1️⃣ Fetch bank code
     const bankResponse = await axios.get(`${PAYSTACK_BASE_URL}/bank`, { headers: paystackHeaders });
-    const bank = bankResponse.data.data.find((b) => b.name.toLowerCase() === bank_name.toLowerCase());
+    const bank = bankResponse.data.data.find(
+      (b) => b.name.toLowerCase() === bank_name.toLowerCase()
+    );
 
     if (!bank) {
       return res.status(400).json({ error: "Bank not found" });
@@ -129,19 +131,11 @@ router.post("/paystack/withdraw", async (req, res) => {
       { headers: paystackHeaders }
     );
 
-    // 4️⃣ Check if OTP is required
-    // if (transferResponse.data.data.status === "otp") {
-    //   return res.json({
-    //     success: true,
-    //     message: "OTP required to finalize transfer",
-    //     transfer_code: transferResponse.data.data.transfer_code,
-    //   });
-    // }
-
-    // ✅ If no OTP is required, transfer is completed
+    // ✅ Transfer successfully initiated
     res.json({
       success: true,
       message: "Withdrawal successfully completed",
+      data: transferResponse.data.data, // optional: send this to show reference/status
     });
   } catch (error) {
     console.error("Error in withdrawal:", error.response?.data || error);

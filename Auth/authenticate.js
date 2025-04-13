@@ -130,13 +130,13 @@ router.post("/paystack/withdraw", async (req, res) => {
     );
 
     // 4️⃣ Check if OTP is required
-    if (transferResponse.data.data.status === "otp") {
-      return res.json({
-        success: true,
-        message: "OTP required to finalize transfer",
-        transfer_code: transferResponse.data.data.transfer_code,
-      });
-    }
+    // if (transferResponse.data.data.status === "otp") {
+    //   return res.json({
+    //     success: true,
+    //     message: "OTP required to finalize transfer",
+    //     transfer_code: transferResponse.data.data.transfer_code,
+    //   });
+    // }
 
     // ✅ If no OTP is required, transfer is completed
     res.json({

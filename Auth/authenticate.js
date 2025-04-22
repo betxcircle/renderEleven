@@ -1384,7 +1384,7 @@ router.post('/verify-otpwithdraw', async (req, res) => {
       userId,
       amount: amount,
       fullName: fullName,
-      WithdrawStatus: 'pending',
+      WithdrawStatus: 'success',
       date: new Date(),
     });
     await transaction.save();
@@ -1421,7 +1421,7 @@ router.post('/verify-otpwithdraw', async (req, res) => {
     <p style="font-size: 14px; margin-left: 20px; text-align: center">
       Transaction ID: <strong>${transaction._id}</strong><br>
       Amount: <strong>NGN ${amount}</strong><br>
-      <p style="color:rgb(205, 9, 9)">Status:<strong>Pending</strong>,</p><br>
+      <p style="color:rgb(205, 9, 9)">Status:<strong>Success</strong>,</p><br>
       Date: <strong>${new Date().toLocaleString()}</strong>
     </p>
 
@@ -1460,7 +1460,7 @@ router.post('/verify-otpwithdraw', async (req, res) => {
         to: device.expoPushToken,
         sound: 'default',
         title: title || 'Withdrawal Notification',
-        body: message || `Your withdrawal of NGN ${withdrawalAmount.toFixed(2)} is being processed.`,
+        body: message || `Your withdrawal of NGN ${withdrawalAmount.toFixed(2)} was successful`,
       };
 
       // Chunk the notifications and send them in batches

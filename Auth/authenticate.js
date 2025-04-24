@@ -86,6 +86,33 @@ const paystackHeaders = {
   "Content-Type": "application/json",
 };
 
+// Fetch all games won by user
+router.get('/user/:userId', async (req, res) => {
+  try {
+    const wins = await WinnerModel.find({ winnerName: req.params.userId });
+    res.json(wins);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching wins' });
+  }
+});
+
+// Fetch all games lost by user
+// Fetch all games lost by user
+router.get('/user/:userId', async (req, res) => {
+  try {
+    const losses = await LoserModel.find({ loserName: req.params.userId });
+    res.json(losses);
+  } catch (error) {
+    console.error('Error fetching losses:', error); // Log to server console
+    res.status(500).json({ 
+      message: 'Error fetching losses', 
+      error: error.message // Include error message in response
+    });
+  }
+});
+
+
+
 router.post("/paystack/withdraw", async (req, res) => {
   const { name, account_number, bank_name, amount, currency } = req.body;
 

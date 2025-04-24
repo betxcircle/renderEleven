@@ -14,6 +14,7 @@ const BankModel = require('../models/BankModel');
 const WithdrawAuthModel = require("../models/WithdrawAuthModel")
 const VirtualAccountModel = require("../models/VirtualAccountModel");
 const WinnerModel = require("../models/WinnerModel");
+const LoserModel = require("../models/LoserModel");
 const TictactoeModel = require("../models/BetCashModel");
 const DeleteRequestModel = require('../models/DeleteRequestModel');
 const ReferralModel = require('../models/ReferralModel');

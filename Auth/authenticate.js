@@ -87,7 +87,7 @@ const paystackHeaders = {
 };
 
 // Fetch all games won by user
-router.get('/usergame/:userId', async (req, res) => {
+router.get('/userwinner/:userId', async (req, res) => {
   try {
     const wins = await WinnerModel.find({ winnerName: req.params.userId });
     res.json(wins);
@@ -98,7 +98,7 @@ router.get('/usergame/:userId', async (req, res) => {
 
 // Fetch all games lost by user
 // Fetch all games lost by user
-router.get('/usergame/:userId', async (req, res) => {
+router.get('/userloser/:userId', async (req, res) => {
   try {
     const losses = await LoserModel.find({ loserName: req.params.userId });
     res.json(losses);

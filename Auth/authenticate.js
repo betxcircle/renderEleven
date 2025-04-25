@@ -1379,151 +1379,49 @@ router.post('/send-otptransaction', async (req, res) => {
 
 
 router.post('/verify-otpwithdraw', async (req, res) => {
-  const { userId, otp, totalAmount, amount, title, message, fullName } = req.body;
+  const { userId, otp, totalAmount } = req.body;
 
   try {
-    // Retrieve the OTP from the database
+    // 1️⃣ Check OTP
     const otpRecord = await TransOtpVerify.findOne({ userId, otp });
     if (!otpRecord) {
       return res.status(400).send('Invalid OTP');
     }
 
-    // Fetch the user from the database
+    // 2️⃣ Fetch User
     const user = await OdinCircledbModel.findById(userId);
     if (!user) {
       return res.status(400).send('User not found');
     }
 
-
-    // Validate the withdrawal amount
+    // 3️⃣ Validate Amount
     const withdrawalAmount = parseFloat(totalAmount);
     if (isNaN(withdrawalAmount) || withdrawalAmount <= 0) {
       return res.status(400).send('Invalid amount');
     }
 
-    // Check if the user has sufficient balance
+    // 4️⃣ Check Balance
     if (user.wallet.cashoutbalance < withdrawalAmount) {
       return res.status(400).send('Insufficient balance');
     }
 
-    // Deduct the amount from the user's wallet
-    user.wallet.cashoutbalance -= withdrawalAmount;
-    await user.save();
-
-    // Save the transaction record
-    const transaction = new DebitModel({
-      userId,
-      amount: amount,
-      fullName: fullName,
-      WithdrawStatus: 'success',
-      date: new Date(),
-    });
-    await transaction.save();
-
-    // Clear the OTP after successful verification
+    // 5️⃣ Clear OTP
     await TransOtpVerify.deleteOne({ userId, otp });
 
-    // Step 1: Send Email Notification
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: 'odincirclex@gmail.com',
-        pass: 'xyqi',
-      },
+    // ✅ Success
+    return res.status(200).json({
+      message: 'OTP verified successfully. Sufficient balance confirmed.',
     });
 
-    const emailOptions = {
-      from: 'odincirclex@gmail.com',
-      to: user.email,
-      subject: 'Withdrawal Notification',
-      html: `
-     <div style="font-family: Arial, sans-serif; color: #333; background-color: #f8f8f8; padding: 20px; border-radius: 10px; max-width: 600px; margin: 0 auto;">
-  <!-- Header -->
-  <div style="text-align: center; background-color:rgb(12, 14, 16); color: white; padding: 10px 0; border-radius: 10px 10px 0 0;">
-    <h4 style="margin: 0; font-size: 14px;">Withdrawal Notification</h4>
-  </div>
-
-  <!-- Main Content -->
-  <div style="padding: 20px; background-color: #fff; border-radius: 0 0 10px 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-    <p style="font-size: 16px; margin-bottom: 10px;">Hello <strong>${user.fullName}</strong>,</p>
-    <p style="font-size: 16px; margin-bottom: 10px; text-align: center">Your withdrawal of <strong>NGN ${withdrawalAmount.toFixed(2)}</strong> has been successfully processed.</p>
-    
-    <p style="font-size: 16px; margin-bottom: 10px; text-align: center"><strong>Transaction Details:</strong></p>
-    <p style="font-size: 14px; margin-left: 20px; text-align: center">
-      Transaction ID: <strong>${transaction._id}</strong><br>
-      Amount: <strong>NGN ${amount}</strong><br>
-      <p style="color:rgb(205, 9, 9)">Status:<strong>Success</strong>,</p><br>
-      Date: <strong>${new Date().toLocaleString()}</strong>
-    </p>
-
-
-    <p style="font-size: 16px; margin-top: 20px;">If you have any questions or concerns, please contact us at <a href="mailto:support@example.com" style="color: #007bff;">odincirclex@gmail.com</a>.</p>
-  </div>
-
-  <!-- Footer -->
-  <div style="text-align: center; margin-top: 20px; font-size: 14px; color: #777;">
-    <p style="margin: 0;">Thank you for using our service.</p>
-  </div>
-</div>
-      `,
-    };
-
-    await transporter.sendMail(emailOptions);
-
-    try {
-      // const device = await Device.findOne({ userId: userObjectId });
-      const device = await Device.findOne({
-        users: { $elemMatch: { _id: userId } }
-      });
-      
-      
-      if (!device) {
-        return res.status(404).json({ message: 'Device not found.' });
-      }
-
-   // Check if the expoPushToken is valid
-   if (!Expo.isExpoPushToken(device.expoPushToken)) {
-    console.log('Invalid Expo Push Token:', device.expoPushToken);
-    return { status: 400, message: 'Invalid Expo Push Token.' };
-  }
-
-      const notificationMessage = {
-        to: device.expoPushToken,
-        sound: 'default',
-        title: title || 'Withdrawal Notification',
-        body: message || `Your withdrawal of NGN ${withdrawalAmount.toFixed(2)} was successful`,
-      };
-
-      // Chunk the notifications and send them in batches
-      const chunks = expo.chunkPushNotifications([notificationMessage]);
-      const tickets = [];
-
-      for (const chunk of chunks) {
-        try {
-          const ticketChunk = await expo.sendPushNotificationsAsync(chunk);
-          tickets.push(...ticketChunk);
-        } catch (error) {
-          console.error('Error sending notification chunk:', error);
-          return res.status(500).json({ message: 'Error sending notification.' });
-        }
-      }
-
-      // Respond with success
-      return res.status(200).json({
-        message: 'Withdrawal successful. Email and notification sent.',
-        tickets,
-      });
-
-    } catch (error) {
-      console.error('Error sending notification:', error.message);
-      return res.status(500).json({ message: 'Error sending notification.', error: error.message });
-    }
-
   } catch (error) {
-    console.error('Error during withdrawal process:', error.message);
-    return res.status(500).json({ message: 'An error occurred during the withdrawal process.', error: error.message });
+    console.error('Error during OTP verification:', error.message);
+    return res.status(500).json({
+      message: 'An error occurred during the OTP verification process.',
+      error: error.message,
+    });
   }
 });
+
 
 const verifyWithdrawalOtp = async ({ userId, otp, totalAmount, amount, title, message, fullName }) => {
   const otpRecord = await TransOtpVerify.findOne({ userId, otp });

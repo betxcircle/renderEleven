@@ -1229,7 +1229,9 @@ router.put('/updateUserProfile/:userId', async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-    user.fullName = fullName;
+
+    // Normalize fullName before saving
+    user.fullName = fullName?.trim().toLowerCase();
     await user.save();
 
     res.status(200).json({ message: 'Profile updated successfully' });
@@ -1237,6 +1239,7 @@ router.put('/updateUserProfile/:userId', async (req, res) => {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
+
 
 router.post('/add-bank-details', async (req, res) => {
   const { bankName, accountName, accountNumber, userId } = req.body;
@@ -1620,7 +1623,25 @@ router.get('/check-fullname', async (req, res) => {
 });
 
 
+router.get("/check-username", async (req, res) => {
+   const fullName = req.query.fullName?.trim().toLowerCase();
 
+  try {
+    // Check if username exists in the database
+    const userExists = await OdinCircledbModel.findOne({ fullName });
+
+    if (userExists) {
+      return res.json({
+        available: false,
+      });
+    } else {
+      return res.json({ available: true });
+    }
+  } catch (error) {
+    console.error("Error checking username:", error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+});
 
 
 // Check balance route
@@ -2852,25 +2873,7 @@ router.get('/api/batch-answers', async (req, res) => {
   }
 });
 
-router.get("/check-username", async (req, res) => {
-  const { fullName } = req.query;
 
-  try {
-    // Check if username exists in the database
-    const userExists = await OdinCircledbModel.findOne({ fullName });
-
-    if (userExists) {
-      return res.json({
-        available: false,
-      });
-    } else {
-      return res.json({ available: true });
-    }
-  } catch (error) {
-    console.error("Error checking username:", error);
-    return res.status(500).json({ error: "Internal Server Error" });
-  }
-});
 
 
 module.exports = router;

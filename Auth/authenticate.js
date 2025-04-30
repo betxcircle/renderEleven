@@ -416,7 +416,7 @@ router.post('/login', async (req, res) => {
 
 router.post('/register',upload.single('image'), registrationLimiter, async (req, res) => {
   try {
-    const { fullName, email, password, expoPushToken,phone, image, referralCode } = req.body;
+    const { password, expoPushToken,phone, image, referralCode } = req.body;
 
     // Check if req.file exists
     if (!req.file) {

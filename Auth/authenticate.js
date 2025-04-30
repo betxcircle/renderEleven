@@ -460,13 +460,16 @@ router.post('/register',upload.single('image'), registrationLimiter, async (req,
     // Generate a random 4-digit OTP
     const otp = Math.floor(1000 + Math.random() * 9000);
 
-
+    // Example: Express + MongoDB
+const email = req.body.email?.trim().toLowerCase();
+const fullName = req.body.fullName?.trim().toLowerCase();
+    
     // Create a new user
     const newUser = await OdinCircledbModel.create({
-      fullName: req.body.fullName,
+      fullName,
       firstName: req.body.firstName,
       lastName: req.body.lastName,
-      email: req.body.email,
+      email,
       //password: req.body.password,
       password: hashedPassword, // Use hashed password
       // Other user properties...
@@ -1584,7 +1587,7 @@ router.post('/check-user-existence', async (req, res) => {
 
 router.get('/check-email', async (req, res) => {
   try {
-    const { email } = req.query;
+    const email = req.query.email?.trim().toLowerCase();
 
     if (!email) {
       return res.status(400).json({ message: 'email is required.' });
@@ -1601,7 +1604,7 @@ router.get('/check-email', async (req, res) => {
 
 router.get('/check-fullname', async (req, res) => {
   try {
-    const { fullName } = req.query;
+   const fullName = req.query.fullName?.trim().toLowerCase();
 
     if (!fullName) {
       return res.status(400).json({ message: 'Full name is required.' });

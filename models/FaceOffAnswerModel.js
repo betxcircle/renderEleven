@@ -13,15 +13,10 @@ const faceOffAnswerSchema = new mongoose.Schema({
         ref: 'User', 
         required: true 
       },
-      answers: [
-        {
-          questionId: { 
-            type: mongoose.Schema.Types.ObjectId, 
-            ref: 'Question' 
-          },
-          answer: { type: String }
-        }
-      ]
+      correctAnswerCount: { 
+        type: Number, 
+        required: true
+      }
     }
   ],
   timer: { type: Number },
@@ -30,3 +25,4 @@ const faceOffAnswerSchema = new mongoose.Schema({
 
 const FaceOffAnswer = mongoose.model('FaceOffAnswer', faceOffAnswerSchema);
 module.exports = FaceOffAnswer;
+

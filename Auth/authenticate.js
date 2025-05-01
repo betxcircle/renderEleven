@@ -2804,9 +2804,9 @@ router.post('/faceoffanswers', async (req, res) => {
       return res.status(400).json({ message: 'Invalid request data' });
     }
 
-    // Ensure each entry in 'userAnswers' contains 'userId' and an 'answers' array
+    // Ensure each entry in 'userAnswers' contains 'userId' and a 'correctAnswerCount'
     const validAnswers = userAnswers.every(
-      (entry) => entry.userId && Array.isArray(entry.answers)
+      (entry) => entry.userId && typeof entry.correctAnswerCount === 'number'
     );
 
     if (!validAnswers) {
@@ -2828,8 +2828,8 @@ router.post('/faceoffanswers', async (req, res) => {
       }
 
       // Add new user answers to the existing record
-      newAnswers.forEach(({ userId, answers }) => {
-        existingRecord.userAnswers.push({ userId, answers });
+      newAnswers.forEach(({ userId, correctAnswerCount }) => {
+        existingRecord.userAnswers.push({ userId, correctAnswerCount });
       });
 
       // Update the record with the new answers and timer
@@ -2840,12 +2840,12 @@ router.post('/faceoffanswers', async (req, res) => {
     }
 
     // If the batchId does not exist, create a new record
-    const answerDocs = userAnswers.map(({ userId, answers }) => ({
+    const answerDocs = userAnswers.map(({ userId, correctAnswerCount }) => ({
       batchId,
       userAnswers: [
         {
           userId,
-          answers, // Array of answers per user
+          correctAnswerCount, // Store the count of correct answers
         }
       ],
       timer,
@@ -2860,6 +2860,7 @@ router.post('/faceoffanswers', async (req, res) => {
     res.status(500).json({ message: 'Error saving answers' });
   }
 });
+
 
 
 // Sample route to fetch batch answers

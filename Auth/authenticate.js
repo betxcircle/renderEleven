@@ -1995,15 +1995,15 @@ router.get("/users", async (req, res) => {
   }
 });
 
-router.get('/usersAll', async (req, res) => {
-  try {
-    const users = await OdinCircledbModel.find({}, 'fullName'); // Fetch only fullName
-    res.json(users); // Send the array of users with fullName
-  } catch (error) {
-    console.error('Error fetching users:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
+// router.get('/usersAll', async (req, res) => {
+//   try {
+//     const users = await OdinCircledbModel.find({}, 'fullName'); // Fetch only fullName
+//     res.json(users); // Send the array of users with fullName
+//   } catch (error) {
+//     console.error('Error fetching users:', error);
+//     res.status(500).json({ error: 'Internal Server Error' });
+//   }
+// });
 
 
 router.get('/user/friends/:userId', async (req, res) => {

@@ -2803,7 +2803,7 @@ router.put('/faceoffbatches/:id', async (req, res) => {
 });
 
 
-router.get('/faceoffanswers', async (req, res) => {
+router.get('/faceoffanswer', async (req, res) => {
   try {
     const { batchId } = req.query;
 

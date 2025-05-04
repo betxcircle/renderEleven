@@ -2803,6 +2803,26 @@ router.put('/faceoffbatches/:id', async (req, res) => {
 });
 
 
+router.get('/faceoffanswers', async (req, res) => {
+  try {
+    const { batchId } = req.query;
+
+    if (!batchId) {
+      return res.status(400).json({ message: 'batchId query parameter is required' });
+    }
+
+    const record = await FaceOffAnswer.findOne({ batchId });
+
+    if (!record) {
+      return res.status(404).json({ message: 'Batch not found' });
+    }
+
+    res.status(200).json(record);
+  } catch (error) {
+    console.error('Error fetching faceoff answers:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
 
 
 router.post('/faceoffanswers', async (req, res) => {

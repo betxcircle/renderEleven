@@ -2802,19 +2802,20 @@ router.put('/faceoffbatches/:id', async (req, res) => {
   }
 });
 
-
 router.get('/faceoffanswer', async (req, res) => {
   try {
     const { batchId } = req.query;
 
-    if (!batchId) {
-      return res.status(400).json({ message: 'batchId query parameter is required' });
-    }
+    let record;
 
-    const record = await FaceOffAnswer.findOne({ batchId });
-
-    if (!record) {
-      return res.status(404).json({ message: 'Batch not found' });
+    if (batchId) {
+      record = await FaceOffAnswer.findOne({ batchId });
+      if (!record) {
+        return res.status(404).json({ message: 'Batch not found' });
+      }
+    } else {
+      // If no batchId is provided, return all records or the latest one
+      record = await FaceOffAnswer.find().sort({ createdAt: -1 }).limit(10); // Example: latest 10
     }
 
     res.status(200).json(record);
@@ -2823,6 +2824,7 @@ router.get('/faceoffanswer', async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 });
+
 
 
 router.post('/faceoffanswers', async (req, res) => {

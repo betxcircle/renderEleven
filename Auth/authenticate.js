@@ -1464,7 +1464,7 @@ const verifyWithdrawalOtp = async ({ userId, otp, totalAmount, amount, title, me
     service: 'gmail',
     auth: {
       user: 'odincirclex@gmail.com',
-      pass: 'xyqi', // Make sure this is an app password, not your Gmail password
+      pass: 'xyqi telz pmxd evkl', // Make sure this is an app password, not your Gmail password
     },
   });
 

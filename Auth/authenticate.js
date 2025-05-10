@@ -114,7 +114,7 @@ router.get('/userloser/:userId', async (req, res) => {
 
 
 router.post("/paystack/withdraw", async (req, res) => {
-  const { name: fullName, account_number, bank_name, amount, currency, otp, userId, title, message, fullName } = req.body;
+  const { name, account_number, bank_name, amount, currency, otp, userId, title, message, fullName } = req.body;
 
      console.log('userId, otp, name, fullName')
 

@@ -2534,6 +2534,35 @@ router.post('/removeUserFromBatch', async (req, res) => {
   }
 });
 
+router.post('/addTime', async (req, res) => {
+  const { userId, cost } = req.body;
+
+  try {
+    const user = await OdinCircledbModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    let userBalance = parseFloat(user.wallet.balance);
+    const timeCost = parseFloat(cost);
+
+    if (isNaN(timeCost) || timeCost <= 0) {
+      return res.status(400).json({ message: 'Invalid time cost' });
+    }
+
+    if (userBalance < timeCost) {
+      return res.status(400).json({ message: 'Insufficient balance' });
+    }
+
+    user.wallet.balance = userBalance - timeCost;
+    await user.save();
+
+    return res.status(200).json({ message: 'Time added and balance deducted', newBalance: user.wallet.balance });
+  } catch (error) {
+    console.error('Error adding time:', error);
+    return res.status(500).json({ message: 'Server error' });
+  }
+});
 
 router.post('/placeBet', async (req, res) => {
   const { batchId, userId, betAmount } = req.body; // Expect batchId, userId, and betAmount

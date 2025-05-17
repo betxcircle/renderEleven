@@ -8,6 +8,7 @@ const WalletModel = require('../models/Walletmodel');
 const TopUpModel = require('../models/TopUpModel');
 const DebitModel = require('../models/DebitModel');
 const ChatModel = require('../models/ChatModel');
+const BetIntent = require('../models/BetIntent');
 const UserOtpVerification = require('../models/UserOtpVerify');
 const TransOtpVerify = require('../models/TransOtpVerify');
 const BankModel = require('../models/BankModel');
@@ -2993,6 +2994,88 @@ function startGameCountdownNotifications() {
 
 // Call this function when the game countdown begins
 startGameCountdownNotifications();
+
+
+router.post('/intentToBet', async (req, res) => {
+  const { batchId, userId, betAmount } = req.body;
+
+  try {
+    // Prevent duplicate intent
+    const existingIntent = await BetIntent.findOne({ batchId, userId });
+    if (existingIntent) {
+      return res.json({ message: 'User already joined' });
+    }
+
+    const intent = new BetIntent({ batchId, userId, betAmount });
+    await intent.save();
+
+    res.json({ message: 'Intent registered' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
+// 2. When room is full – d
+router.post('/deductBetsForRoom', async (req, res) => {
+  const { batchId } = req.body;
+
+  try {
+    const batch = await BatchModel.findById(batchId);
+    if (!batch) return res.status(404).json({ message: 'Batch not found' });
+
+    const intents = await BetIntent.find({ batchId });
+
+    if (intents.length < batch.NumberPlayers) {
+      return res.status(400).json({ message: 'Room is not full yet' });
+    }
+
+    // Pre-validate all users
+    for (const intent of intents) {
+      const user = await OdinCircledbModel.findById(intent.userId);
+      if (!user) {
+        return res.status(404).json({ message: `User ${intent.userId} not found` });
+      }
+
+      const userBalance = parseFloat(user.wallet.balance);
+      const requiredBet = parseFloat(batch.betAmount);
+      const userBet = parseFloat(intent.betAmount);
+
+      if (isNaN(userBet) || userBet !== requiredBet) {
+        return res.status(400).json({ message: `Invalid bet for user ${intent.userId}` });
+      }
+
+      if (userBalance < userBet) {
+        return res.status(400).json({ message: `Insufficient balance for user ${intent.userId}` });
+      }
+    }
+
+    // Deduct balances and update batch
+    for (const intent of intents) {
+      const user = await OdinCircledbModel.findById(intent.userId);
+      const userBet = parseFloat(intent.betAmount);
+
+      user.wallet.balance -= userBet;
+      await user.save();
+
+      // Add to batch's betsAmountPlayer array
+      batch.betsAmountPlayer.push({
+        userId: intent.userId,
+        betsAmount: userBet,
+      });
+    }
+
+    // Lock or start the game
+    batch.status = 'started';
+    await batch.save();
+
+    res.json({ message: 'Bets deducted, game ready to start' });
+  } catch (error) {
+    console.error('Deduct error:', error);
+    res.status(500).json({ message: 'Server error during bet deduction' });
+  }
+});
 
 
 module.exports = router;

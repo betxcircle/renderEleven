@@ -1,6 +1,7 @@
 const express = require('express');
 const nodemailer = require('nodemailer');
 const rateLimit = require('express-rate-limit');
+const schedule = require('node-schedule');
 const axios = require("axios");
 const mongoose = require('mongoose');
 const OdinCircledbModel = require('../models/odincircledb');
@@ -2937,7 +2938,62 @@ router.get('/api/batch-answers', async (req, res) => {
   }
 });
 
+router.post('/start-game-countdown', (req, res) => {
+  try {
+    startGameCountdownNotifications(); // your function from earlier
+    res.status(200).json({ message: 'Countdown started and notifications scheduled.' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to start countdown' });
+  }
+});
 
+async function sendNotification(title, message) {
+  try {
+    const devices = await Device.find({});
+    const tokens = devices.map(d => d.expoPushToken);
+
+    const messages = tokens
+      .filter(token => Expo.isExpoPushToken(token))
+      .map(token => ({
+        to: token,
+        sound: 'default',
+        title,
+        body: message,
+      }));
+
+    const chunks = expo.chunkPushNotifications(messages);
+    for (const chunk of chunks) {
+      await expo.sendPushNotificationsAsync(chunk);
+    }
+
+    console.log(`[${new Date().toISOString()}] Notification sent:`, message);
+  } catch (err) {
+    console.error('Notification error:', err);
+  }
+}
+
+function startGameCountdownNotifications() {
+  // 5-minute countdown
+  const countdown = 5 * 60 * 1000;
+
+  // Schedule 2-mins left (3 minutes after start)
+  setTimeout(() => {
+    sendNotification('Game Alert', '2 minutes left before the game starts!');
+  }, 3 * 60 * 1000);
+
+  // Schedule 1-min left (4 minutes after start)
+  setTimeout(() => {
+    sendNotification('Game Alert', '1 minute left before the game starts!');
+  }, 4 * 60 * 1000);
+
+  // Schedule 10 seconds left (4:50 after start)
+  setTimeout(() => {
+    sendNotification('Game Alert', '10 seconds left before the game starts!');
+  }, 4 * 60 * 1000 + 50 * 1000);
+}
+
+// Call this function when the game countdown begins
+startGameCountdownNotifications();
 
 
 module.exports = router;

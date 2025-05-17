@@ -3051,20 +3051,23 @@ router.post('/deductBetsForRoom', async (req, res) => {
       }
     }
 
-    // Deduct balances and update batch
-    for (const intent of intents) {
-      const user = await OdinCircledbModel.findById(intent.userId);
-      const userBet = parseFloat(intent.betAmount);
+// Only deduct for users not already in betsAmountPlayer
+for (const intent of intents) {
+  const alreadyDeducted = batch.betsAmountPlayer.some(
+    (b) => String(b.userId) === String(intent.userId)
+  );
+  if (alreadyDeducted) continue;
 
-      user.wallet.balance -= userBet;
-      await user.save();
+  const user = await OdinCircledbModel.findById(intent.userId);
+  const userBet = parseFloat(intent.betAmount);
+  user.wallet.balance -= userBet;
+  await user.save();
 
-      // Add to batch's betsAmountPlayer array
-      batch.betsAmountPlayer.push({
-        userId: intent.userId,
-        betsAmount: userBet,
-      });
-    }
+  batch.betsAmountPlayer.push({
+    userId: intent.userId,
+    betsAmount: userBet,
+  });
+}
 
     // Lock or start the game
     batch.status = 'started';

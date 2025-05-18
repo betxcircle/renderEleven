@@ -2,11 +2,11 @@ const mongoose = require('mongoose');
 const User = require('../models/User'); // Import the User model
 
 const BatchAnswerSchema = new mongoose.Schema(
-  {
+{
     batchId: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
-      ref: 'Batch', // Reference to the Batch collection
+      ref: 'Batch',
     },
     batchName: {
       type: String,
@@ -19,22 +19,31 @@ const BatchAnswerSchema = new mongoose.Schema(
     userId: {
       type: [mongoose.Schema.Types.ObjectId],
       required: true,
-      ref: 'User', // Reference to the User collection
+      ref: 'User',
     },
-    userAnswers: [{
+    userAnswers: [
+      {
         userId: { type: String, required: true },
-        correctAnswers: { type: Number, required: true },  // Total correct answers as a number
+        answers: [
+          {
+            question: { type: String, required: true },
+            selectedAnswer: { type: String, required: true },
+            correctAnswer: { type: String, required: true },
+          }
+        ],
+        correctAnswers: { type: Number, required: true },
         timestamp: {
           type: Date,
           default: Date.now,
         },
-      }],
+      }
+    ],
     timestamp: {
       type: Date,
       default: Date.now,
     },
   },
-  { timestamps: true } // Automatically adds `createdAt` and `updatedAt` fields
+  { timestamps: true }
 );
 
 const BatchAnswer = mongoose.model('BatchAnswer', BatchAnswerSchema);

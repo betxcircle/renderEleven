@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const faceOffAnswerSchema = new mongoose.Schema({
-  {
+  
     batchId: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,

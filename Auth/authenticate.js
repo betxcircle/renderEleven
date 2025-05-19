@@ -2925,71 +2925,7 @@ router.get('/faceoffanswer', async (req, res) => {
 
 
 
-router.post('/faceoffanswers', async (req, res) => {
-  try {
-    const { batchId, userAnswers, timer } = req.body;
 
-    // Validate required fields
-    if (!batchId || !Array.isArray(userAnswers) || userAnswers.length === 0) {
-      return res.status(400).json({ message: 'Invalid request data' });
-    }
-
-    // Ensure each entry in 'userAnswers' contains 'userId' and a 'correctAnswerCount'
-    const validAnswers = userAnswers.every(
-      (entry) => entry.userId && typeof entry.correctAnswerCount === 'number'
-    );
-
-    if (!validAnswers) {
-      return res.status(400).json({ message: 'Invalid answers format' });
-    }
-
-    // Find existing record for the batchId
-    const existingRecord = await FaceOffAnswer.findOne({ batchId });
-
-    // If the batchId exists, update the userAnswers
-    if (existingRecord) {
-      // Filter out answers that have already been submitted by the user
-      const newAnswers = userAnswers.filter(
-        ({ userId }) => !existingRecord.userAnswers.some(u => u.userId.equals(userId))
-      );
-
-      if (newAnswers.length === 0) {
-        return res.status(400).json({ message: 'Users already submitted answers' });
-      }
-
-      // Add new user answers to the existing record
-      newAnswers.forEach(({ userId, correctAnswerCount }) => {
-        existingRecord.userAnswers.push({ userId, correctAnswerCount });
-      });
-
-      // Update the record with the new answers and timer
-      existingRecord.timer = timer;
-      await existingRecord.save();
-
-      return res.status(200).json({ message: 'Answers added to existing batch successfully' });
-    }
-
-    // If the batchId does not exist, create a new record
-    const answerDocs = userAnswers.map(({ userId, correctAnswerCount }) => ({
-      batchId,
-      userAnswers: [
-        {
-          userId,
-          correctAnswerCount, // Store the count of correct answers
-        }
-      ],
-      timer,
-    }));
-
-    // Save multiple user answers in a new batch
-    await FaceOffAnswer.insertMany(answerDocs);
-
-    res.status(200).json({ message: 'Answers saved successfully' });
-  } catch (error) {
-    console.error('Error saving answers:', error);
-    res.status(500).json({ message: 'Error saving answers' });
-  }
-});
 
 
 
@@ -3006,6 +2942,74 @@ router.get('/api/batch-answers', async (req, res) => {
 
 
 
+router.post('/faceoffanswers', async (req, res) => {
+  const {
+    batchId,
+    batchName,
+    totalBetAmount,
+    userId,
+    correctAnswerCount,
+    answers,
+    timer,
+    timestamp,
+  } = req.body;
+
+  if (!userId || typeof correctAnswerCount !== 'number' || !Array.isArray(answers)) {
+    return res.status(400).json({ message: 'Invalid request data' });
+  }
+
+  try {
+    let faceOffAnswer = await FaceOffAnswer.findOne({ batchId });
+
+    if (faceOffAnswer) {
+      const existingUserAnswer = faceOffAnswer.userAnswers.find(
+        (user) => user.userId.toString() === userId
+      );
+
+      if (existingUserAnswer) {
+        return res
+          .status(400)
+          .json({ message: 'Answers for this user and batch already exist.' });
+      }
+
+      faceOffAnswer.userAnswers.push({
+        userId,
+        correctAnswerCount,
+        answers,
+        timestamp: timestamp || new Date(),
+      });
+
+      faceOffAnswer.timer = timer;
+      await faceOffAnswer.save();
+    } else {
+      faceOffAnswer = new FaceOffAnswer({
+        batchId,
+        batchName,
+        totalBetAmount,
+        userId: [userId], // Assuming schema has this
+        userAnswers: [
+          {
+            userId,
+            correctAnswerCount,
+            answers,
+            timestamp: timestamp || new Date(),
+          },
+        ],
+        timer,
+        timestamp: timestamp || new Date(),
+      });
+
+      await faceOffAnswer.save();
+    }
+
+    return res
+      .status(200)
+      .json({ message: 'FaceOff answers saved successfully', batch: faceOffAnswer });
+  } catch (error) {
+    console.error('Error saving faceoff answers:', error);
+    return res.status(500).json({ message: 'Server error' });
+  }
+});
 
 
 

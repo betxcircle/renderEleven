@@ -15,7 +15,7 @@ const faceOffAnswerSchema = new mongoose.Schema({
       type: String,
       required: true,
     },
-    userAnswers: [
+   userAnswers: [
       {
         userId: { type: String, required: true },
         answers: [

@@ -4,6 +4,7 @@ const rateLimit = require('express-rate-limit');
 const axios = require("axios");
 const mongoose = require('mongoose');
 const verifyToken = require('../k6/verifyToken'); // path may vary
+const SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key';
 const OdinCircledbModel = require('../models/odincircledb');
 const WalletModel = require('../models/Walletmodel');
 const AddTimeLog = require('../models/AddTimeLog');

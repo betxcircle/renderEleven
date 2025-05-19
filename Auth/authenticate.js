@@ -2948,15 +2948,14 @@ router.post('/faceoffanswers', async (req, res) => {
     batchName,
     totalBetAmount,
     userId,
-      correctAnswers, // 👈 changed here too
+    correctAnswers, // 👈 changed here too
     answers,
-    timer,
     timestamp,
   } = req.body;
    console.log('Received data:', req.body); // ⬅️ Add this
 
-  if (!userId || typeof correctAnswerCount !== 'number' || !Array.isArray(answers)) {
-    return res.status(400).json({ message: 'Invalid request data' });
+   if (!Array.isArray(answers) || answers.length === 0) {
+    return res.status(400).json({ message: 'Answers array is required.' });
   }
 
   try {

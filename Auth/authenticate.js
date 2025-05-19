@@ -2979,7 +2979,6 @@ router.post('/faceoffanswers', async (req, res) => {
         timestamp: timestamp || new Date(),
       });
 
-      faceOffAnswer.timer = timer;
       await faceOffAnswer.save();
     } else {
       faceOffAnswer = new FaceOffAnswer({
@@ -2995,7 +2994,6 @@ router.post('/faceoffanswers', async (req, res) => {
             timestamp: timestamp || new Date(),
           },
         ],
-        timer,
         timestamp: timestamp || new Date(),
       });
 

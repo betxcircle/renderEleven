@@ -5,6 +5,7 @@ const axios = require("axios");
 const mongoose = require('mongoose');
 const OdinCircledbModel = require('../models/odincircledb');
 const WalletModel = require('../models/Walletmodel');
+const AddTimeLog = require('../models/AddTimeLog');
 const TopUpModel = require('../models/TopUpModel');
 const DebitModel = require('../models/DebitModel');
 const ChatModel = require('../models/ChatModel');
@@ -2544,7 +2545,7 @@ router.post('/addTime', async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    let userBalance = parseFloat(user.wallet.balance);
+    const userBalance = parseFloat(user.wallet.balance);
     const timeCost = parseFloat(cost);
 
     if (isNaN(timeCost) || timeCost <= 0) {
@@ -2555,10 +2556,17 @@ router.post('/addTime', async (req, res) => {
       return res.status(400).json({ message: 'Insufficient balance' });
     }
 
+    // Deduct balance
     user.wallet.balance = userBalance - timeCost;
     await user.save();
 
-    return res.status(200).json({ message: 'Time added and balance deducted', newBalance: user.wallet.balance });
+    // Save usage log
+    await new AddTimeLog({ userId, cost: timeCost }).save();
+
+    return res.status(200).json({
+      message: 'Time added and balance deducted',
+      newBalance: user.wallet.balance
+    });
   } catch (error) {
     console.error('Error adding time:', error);
     return res.status(500).json({ message: 'Server error' });

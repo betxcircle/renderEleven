@@ -3,6 +3,7 @@ const nodemailer = require('nodemailer');
 const rateLimit = require('express-rate-limit');
 const axios = require("axios");
 const mongoose = require('mongoose');
+const verifyToken = require('../k6/verifyToken'); // path may vary
 const OdinCircledbModel = require('../models/odincircledb');
 const WalletModel = require('../models/Walletmodel');
 const AddTimeLog = require('../models/AddTimeLog');
@@ -2938,10 +2939,25 @@ router.get('/faceoffanswer', async (req, res) => {
 
 
 // Sample route to fetch batch answers
-router.get('/api/batch-answers', async (req, res) => {
+// GET /api/batch-answers?page=1&limit=10
+router.get('/api/batch-answers', verifyToken, async (req, res) => {
   try {
-    const batchAnswers = await BatchAnswer.find();
-    return res.status(200).json(batchAnswers);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const total = await BatchAnswer.countDocuments();
+    const batchAnswers = await BatchAnswer.find()
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    return res.status(200).json({
+      data: batchAnswers,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+      totalItems: total,
+    });
   } catch (error) {
     console.error('Error fetching batch answers:', error);
     return res.status(500).json({ message: 'Server error' });

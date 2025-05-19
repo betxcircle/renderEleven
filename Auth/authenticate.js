@@ -2953,6 +2953,7 @@ router.post('/faceoffanswers', async (req, res) => {
     timer,
     timestamp,
   } = req.body;
+   console.log('Received data:', req.body); // ⬅️ Add this
 
   if (!userId || typeof correctAnswerCount !== 'number' || !Array.isArray(answers)) {
     return res.status(400).json({ message: 'Invalid request data' });

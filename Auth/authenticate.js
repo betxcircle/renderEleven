@@ -403,9 +403,11 @@ router.post('/login', async (req, res) => {
     if (user) {
       // Compare provided password with hashed password in the database
       const isMatch = await bcrypt.compare(password, user.password);
+     // Create JWT
+    const token = jwt.sign({ userId: user._id }, SECRET_KEY, { expiresIn: '1h' });
 
       if (isMatch) {
-        res.status(200).json({ status: 'success', user: user });
+        res.status(200).json({ status: 'success', user: user , token });
       } else {
         res.status(401).json({ status: 'error', message: 'The password is incorrect' });
       }

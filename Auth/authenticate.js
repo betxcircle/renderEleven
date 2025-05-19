@@ -2948,7 +2948,7 @@ router.post('/faceoffanswers', async (req, res) => {
     batchName,
     totalBetAmount,
     userId,
-    correctAnswerCount,
+      correctAnswers, // 👈 changed here too
     answers,
     timer,
     timestamp,
@@ -2975,7 +2975,7 @@ router.post('/faceoffanswers', async (req, res) => {
 
       faceOffAnswer.userAnswers.push({
         userId,
-        correctAnswerCount,
+         correctAnswers, // 👈 changed here too
         answers,
         timestamp: timestamp || new Date(),
       });
@@ -2991,7 +2991,7 @@ router.post('/faceoffanswers', async (req, res) => {
         userAnswers: [
           {
             userId,
-            correctAnswerCount,
+           correctAnswers, // 👈 changed here too
             answers,
             timestamp: timestamp || new Date(),
           },

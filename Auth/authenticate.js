@@ -63,8 +63,6 @@ cloudinary.config({
   api_secret: process.env.API_SECRET,
 });
 
-console.log(process.env.API_KEY, 'API Key');  // Fix: Use process.env.API_KEY
-console.log(process.env.Email_User, 'emai kdsodsy');  // Fix: Use process.env.API_KEY
 
 const router = express.Router();
 
@@ -81,7 +79,7 @@ const registrationLimiter = rateLimit({
   message: 'Too many registration attempts from this IP, please try again after 5 minutes',
 });
 
-const PAYSTACK_SECRET_KEY = 'sk_live_99e08a1ad086cd7380d6b6251e25ec409a71750b';
+const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
 
 
 const PAYSTACK_BASE_URL = "https://api.paystack.co";

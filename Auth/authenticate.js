@@ -82,7 +82,7 @@ const registrationLimiter = rateLimit({
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
 
 
-const PAYSTACK_BASE_URL = "https://api.paystack.co";
+const PAYSTACK_BASE_URL = process.env.PAYSTACK_BASE_URL;
 
 const paystackHeaders = {
   Authorization: `Bearer ${PAYSTACK_SECRET_KEY}`,
@@ -675,7 +675,7 @@ async function sendOTPByEmail(newUser, otp) {
   }
 }
 
-router.get('/referral/:userId', async (req, res) => {
+router.get('/referral/:userId',verifyToken, async (req, res) => {
   const { userId } = req.params;
 
   try {
@@ -962,7 +962,7 @@ router.post('/verify-code', async (req, res) => {
 });
 
 
-router.post('/reset-password', async (req, res) => {
+router.post('/reset-password',verifyToken, async (req, res) => {
   const { email, newPassword } = req.body;
 
   try {

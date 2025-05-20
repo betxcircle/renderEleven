@@ -2941,7 +2941,7 @@ router.get('/faceoffanswer', async (req, res) => {
 
 // Sample route to fetch batch answers
 // GET /api/batch-answers?page=1&limit=10
-router.get('/api/batch-answers', verifyToken, async (req, res) => {
+router.get('/api/batch-answers', async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;

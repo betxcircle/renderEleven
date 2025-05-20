@@ -32,12 +32,6 @@ const allowedOrigins = [`${LOCALHOST1}`, `${LOCALHOST2}`, ];
 
 app.use(cors({ origin: "*" })); // Temporarily allow all for debugging
 
-// Middleware to log every incoming request
-app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
-  next();
-});
-
 
 app.get('/', (req, res) => {
   res.send('Backend is running!');
@@ -110,7 +104,6 @@ const PORT = process.env.PORT || 4444;
 // const PORT_FIFTY_FIVE = process.env.PORT_FIFTY_FIVE;
 // const PORT_FIVE = process.env.PORT_FIVE;
 
-console.log(PORT, 'jdjkdj')
 
 //Listen on different ports
 mainServer.listen(PORT, () => {

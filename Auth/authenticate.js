@@ -1948,7 +1948,7 @@ router.post('/user/remove', async (req, res) => {
 
 
 // GET /transactions?page=1&limit=10
-router.get('/transactions', async (req, res) => {
+router.get('/transactions',verifyToken, async (req, res) => {
   const { userId } = req.query;
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 3;

@@ -32,6 +32,13 @@ const allowedOrigins = [`${LOCALHOST1}`, `${LOCALHOST2}`, ];
 
 app.use(cors({ origin: "*" })); // Temporarily allow all for debugging
 
+// Middleware to log every incoming request
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
+  next();
+});
+
+
 app.get('/', (req, res) => {
   res.send('Backend is running!');
 });

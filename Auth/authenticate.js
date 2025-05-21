@@ -109,7 +109,7 @@ router.get('/userwinner/:userId', async (req, res) => {
 });
 
 // GET /userloser/:userId?page=1&limit=10
-router.get('/userloser/:userId', async (req, res) => {
+router.get('/userloser/:userId',verifyToken, async (req, res) => {
   const { page = 1, limit = 10 } = req.query;
 
   try {
@@ -132,7 +132,7 @@ router.get('/userloser/:userId', async (req, res) => {
 
 
 
-router.post("/paystack/withdraw", async (req, res) => {
+router.post("/paystack/withdraw",verifyToken, async (req, res) => {
   const { name, account_number, bank_name, amount, currency, otp, userId, title, message, fullName } = req.body;
 
      console.log('userId, otp, name, fullName')
@@ -198,7 +198,7 @@ router.post("/paystack/withdraw", async (req, res) => {
 });
 
    
-     router.post("/paystack/finalize-withdrawal", async (req, res) => {
+     router.post("/paystack/finalize-withdrawal",verifyToken, async (req, res) => {
   const { transfer_code, otp, userId, amount, fullName } = req.body;
 
   if (!transfer_code || !otp || !userId || !amount || !fullName) {
@@ -279,7 +279,7 @@ router.post("/paystack/withdraw", async (req, res) => {
 
 
 
-router.post('/paystack/initialize', async (req, res) => {
+router.post('/paystack/initialize',verifyToken, async (req, res) => {
   const { email, amount, userId } = req.body;
   const paystackAmount = amount * 100; // Convert to kobo
 
@@ -308,7 +308,7 @@ router.post('/paystack/initialize', async (req, res) => {
 
 
 // Callback URL for Paystack
-router.get("/paystack/callback", async (req, res) => {
+router.get("/paystack/callback",verifyToken, async (req, res) => {
   try {
     const { reference } = req.query;
     if (!reference) return res.status(400).json({ error: "No reference provided" });
@@ -350,7 +350,7 @@ router.get("/paystack/callback", async (req, res) => {
 
 
  // Verification route (Called by the callback automatically)
-router.post("/paystack/verify", async (req, res) => {
+router.post("/paystack/verify",verifyToken, async (req, res) => {
   const { reference, userId } = req.body;
 
   try {
@@ -717,7 +717,7 @@ router.get('/referral/:userId',verifyToken, async (req, res) => {
   }
 });
 
-router.get('/getBankDetails/:userId', async (req, res) => {
+router.get('/getBankDetails/:userId',verifyToken, async (req, res) => {
   try {
       const { userId } = req.params;
       const bankDetails = await BankModel.findOne({ userId });
@@ -734,7 +734,7 @@ router.get('/getBankDetails/:userId', async (req, res) => {
 
 // Update bank details
 // Update bank details
-router.put('/updateBankDetails/:userId', async (req, res) => {
+router.put('/updateBankDetails/:userId',verifyToken, async (req, res) => {
   try {
     const { userId } = req.params;
     const { bankName, accountName, accountNumber } = req.body;
@@ -774,7 +774,7 @@ router.put('/updateBankDetails/:userId', async (req, res) => {
 
 
 
-router.post("/verifyEmailAndOTP", async (req, res) => {
+router.post("/verifyEmailAndOTP",verifyToken, async (req, res) => {
   try {
     const { email, otp } = req.body;
     
@@ -824,7 +824,7 @@ const transporter = nodemailer.createTransport({
 const generateCode = () => Math.floor(100000 + Math.random() * 900000).toString();
 const generateToken = (email) => jwt.sign({ email }, jwtSecret, { expiresIn: '1h' });
 
-router.post('/register-device', async (req, res) => {
+router.post('/register-device',verifyToken, async (req, res) => {
   const { expoPushToken, userId } = req.body;
 
   // Check if expoPushToken and userId are not null
@@ -859,7 +859,7 @@ router.post('/register-device', async (req, res) => {
 
 
 // Route to update device registration with user ID
-router.post('/update-device', async (req, res) => {
+router.post('/update-device',verifyToken, async (req, res) => {
   const { userId, expoPushToken } = req.body;
 
   if (!userId || !expoPushToken) {
@@ -887,7 +887,7 @@ router.post('/update-device', async (req, res) => {
 });
 
 
-router.post('/send-code', async (req, res) => {
+router.post('/send-code',verifyToken, async (req, res) => {
   const { email } = req.body;
 
   try {
@@ -951,7 +951,7 @@ router.post('/send-code', async (req, res) => {
 
 
 
-router.post('/verify-code', async (req, res) => {
+router.post('/verify-code',verifyToken, async (req, res) => {
   const { email, code } = req.body;
 
   try {
@@ -1007,7 +1007,7 @@ router.post('/reset-password',verifyToken, async (req, res) => {
 
 
 // Mark message as read
-router.put('/messages/read-all', async (req, res) => {
+router.put('/messages/read-all',verifyToken, async (req, res) => {
   const { author } = req.body;
   try {
     // Update all messages from the specified author to mark them as read
@@ -1022,7 +1022,7 @@ router.put('/messages/read-all', async (req, res) => {
 
 
 
-router.get('/api/unread-messages/:recipientId', async (req, res) => {
+router.get('/api/unread-messages/:recipientId',verifyToken, async (req, res) => {
   const { recipientId } = req.params;
 
   try {
@@ -1041,7 +1041,7 @@ router.get('/api/unread-messages/:recipientId', async (req, res) => {
 
 
 // Fetch messages by roomId
-router.get('/messages/retrieve/:roomId', async (req, res) => {
+router.get('/messages/retrieve/:roomId',verifyToken, async (req, res) => {
   const { roomId } = req.params;
 
   try {
@@ -1054,7 +1054,7 @@ router.get('/messages/retrieve/:roomId', async (req, res) => {
 });
 
 
-router.get('/usersWithLastMessages', async (req, res) => {
+router.get('/usersWithLastMessages',verifyToken, async (req, res) => {
   try {
 
     const users = await OdinCircledbModel.find({});
@@ -1093,7 +1093,7 @@ router.post('/cart-items', async (req, res) => {
   res.status(201).json(newItem);
 });
 
-router.post('/check-email', async (req, res) => {
+router.post('/check-email',verifyToken, async (req, res) => {
   const { email } = req.body;
 
   try {
@@ -1110,7 +1110,7 @@ router.post('/check-email', async (req, res) => {
 });
 
 // Create a new delete request
-router.post('/delete-account', async (req, res) => {
+router.post('/delete-account', verifyToken,async (req, res) => {
   const {userId, fullName, firstName, lastName, email, phone,  confirmationText } = req.body;
 
   // Validate input fields
@@ -1140,7 +1140,7 @@ router.post('/delete-account', async (req, res) => {
   }
 });
 
-router.post('/resendOTP', async (req, res) => {
+router.post('/resendOTP',verifyToken, async (req, res) => {
   try {
       const { email, userId } = req.body;
 
@@ -1184,7 +1184,7 @@ router.post('/resendOTP', async (req, res) => {
 });
 
 // Update user's profile image
-router.put('/updateUserProfileImage/:userId', upload.single('image'), async (req, res) => {
+router.put('/updateUserProfileImage/:userId', upload.single('image'),verifyToken, async (req, res) => {
   try {
     const userId = req.params.userId;
 
@@ -1219,7 +1219,7 @@ router.put('/updateUserProfileImage/:userId', upload.single('image'), async (req
 });
 
 // Get user profile by userId
-router.get('/getUserProfile/:userId', async (req, res) => {
+router.get('/getUserProfile/:userId',verifyToken, async (req, res) => {
   try {
     const userId = req.params.userId;
     const user = await OdinCircledbModel.findById(userId);
@@ -1242,7 +1242,7 @@ router.get('/getUserProfile/:userId', async (req, res) => {
 });
 
 // Update user's fullName
-router.put('/updateUserProfile/:userId', async (req, res) => {
+router.put('/updateUserProfile/:userId',verifyToken, async (req, res) => {
   try {
     const userId = req.params.userId;
     const { fullName } = req.body;
@@ -1264,7 +1264,7 @@ router.put('/updateUserProfile/:userId', async (req, res) => {
 });
 
 
-router.post('/add-bank-details', async (req, res) => {
+router.post('/add-bank-details',verifyToken, async (req, res) => {
   const { bankName, accountName, accountNumber, userId } = req.body;
 
   try {
@@ -1295,7 +1295,7 @@ router.post('/add-bank-details', async (req, res) => {
   }
 });
 
-router.post('/verify-password', async (req, res) => {
+router.post('/verify-password',verifyToken, async (req, res) => {
   const { password, amount } = req.body;
   const { userId } = req.body;
 
@@ -1375,7 +1375,7 @@ const sendOTPEmail = async (email, otp) => {
 };
 
 // Send OTP transaction route
-router.post('/send-otptransaction', async (req, res) => {
+router.post('/send-otptransaction',verifyToken, async (req, res) => {
   const { userId, amount  } = req.body;
 
   try {
@@ -1407,7 +1407,7 @@ router.post('/send-otptransaction', async (req, res) => {
 });
 
 
-router.post('/verify-otpwithdraw', async (req, res) => {
+router.post('/verify-otpwithdraw',verifyToken, async (req, res) => {
   const { userId, otp, totalAmount } = req.body;
 
   try {
@@ -1561,7 +1561,7 @@ module.exports = router;
 
 
 // Define the route
-router.post('/addOrUpdateBankDetails', async (req, res) => {
+router.post('/addOrUpdateBankDetails',verifyToken, async (req, res) => {
   const { userId, bankName, accountName, accountNumber } = req.body;
 
   try {
@@ -1586,7 +1586,7 @@ router.post('/addOrUpdateBankDetails', async (req, res) => {
 });
 
 
-router.post('/check-user-existence', async (req, res) => {
+router.post('/check-user-existence',verifyToken, async (req, res) => {
   const { email, phone, bvn, fullName } = req.body;
 
   try {
@@ -1611,7 +1611,7 @@ router.post('/check-user-existence', async (req, res) => {
   }
 });
 
-router.get('/check-email', async (req, res) => {
+router.get('/check-email',verifyToken, async (req, res) => {
   try {
     const email = req.query.email?.trim().toLowerCase();
 
@@ -1628,7 +1628,7 @@ router.get('/check-email', async (req, res) => {
   }
 });
 
-router.get('/check-fullname', async (req, res) => {
+router.get('/check-fullname',verifyToken, async (req, res) => {
   try {
    const fullName = req.query.fullName?.trim().toLowerCase();
 
@@ -1646,7 +1646,7 @@ router.get('/check-fullname', async (req, res) => {
 });
 
 
-router.get("/check-username", async (req, res) => {
+router.get("/check-username",verifyToken, async (req, res) => {
    const fullName = req.query.fullName?.trim().toLowerCase();
 
   try {
@@ -1668,7 +1668,7 @@ router.get("/check-username", async (req, res) => {
 
 
 // Check balance route
-router.post('/check-balance', async (req, res) => {
+router.post('/check-balance',verifyToken, async (req, res) => {
   const { userId, amount } = req.body;
 
   try {
@@ -1689,7 +1689,7 @@ router.post('/check-balance', async (req, res) => {
   }
 });
 
-router.post('/save-topup', async (req, res) => {
+router.post('/save-topup',verifyToken, async (req, res) => {
   const { userId, topUpAmount } = req.body;
 
   try {
@@ -1709,7 +1709,7 @@ router.post('/save-topup', async (req, res) => {
 // Update user balance route
 
 //balance
-router.get("/user/:id", async (req, res) => {
+router.get("/user/:id",verifyToken, async (req, res) => {
     const userId = req.params.id;
   
     try {
@@ -1733,7 +1733,7 @@ router.get("/user/:id", async (req, res) => {
   });
 
    //cashoutbalance
-  router.get("/user/:id", async (req, res) => {
+  router.get("/user/:id",verifyToken, async (req, res) => {
     const userId = req.params.id;
   
     try {
@@ -1759,7 +1759,7 @@ router.get("/user/:id", async (req, res) => {
   });
 
   // Endpoint to get user's wallet balance by ID
-router.get('/user/:userId/balance', async (req, res) => {
+router.get('/user/:userId/balance',verifyToken, async (req, res) => {
     const { userId } = req.params;
   
     try {
@@ -1779,7 +1779,7 @@ router.get('/user/:userId/balance', async (req, res) => {
   });
 
     // Endpoint to get user's wallet cashoutbalance by ID
-router.get('/user/:userId/cashoutbalance', async (req, res) => {
+router.get('/user/:userId/cashoutbalance',verifyToken, async (req, res) => {
   const { userId } = req.params;
 
   try {
@@ -1798,7 +1798,7 @@ router.get('/user/:userId/cashoutbalance', async (req, res) => {
   }
 });
 
-  router.post('/add-update-balance', async (req, res) => {
+  router.post('/add-update-balance',verifyToken, async (req, res) => {
     const { userId, amount } = req.body;
   
     try {
@@ -1824,7 +1824,7 @@ router.get('/user/:userId/cashoutbalance', async (req, res) => {
 
 
 
-  router.post('/user-amount', async (req, res) => {
+  router.post('/user-amount',verifyToken, async (req, res) => {
     const { userId, amount } = req.body;
   
     try {
@@ -1851,7 +1851,7 @@ router.get('/user/:userId/cashoutbalance', async (req, res) => {
 
 
 // Route to get the amount for a specific user
-router.get('/user/:userId/amount', async (req, res) => {
+router.get('/user/:userId/amount',verifyToken, async (req, res) => {
   const { userId } = req.params;
 
   try {
@@ -1875,7 +1875,7 @@ router.get('/user/:userId/amount', async (req, res) => {
 
 
 // Route to get the push token for a given user ID
-router.get('/getPushToken/:recipientId', async (req, res) => {
+router.get('/getPushToken/:recipientId',verifyToken, async (req, res) => {
   const { recipientId } = req.params;
 
   if (!recipientId || !mongoose.Types.ObjectId.isValid(recipientId)) {
@@ -1895,7 +1895,7 @@ router.get('/getPushToken/:recipientId', async (req, res) => {
 });
 
 
-router.post('/user/add', async (req, res) => {
+router.post('/user/add',verifyToken, async (req, res) => {
   const { userId, selectedUserId } = req.body;
 
   try {
@@ -1934,7 +1934,7 @@ router.post('/user/add', async (req, res) => {
 });
 
 // Route to remove a user from the friends list
-router.post('/user/remove', async (req, res) => {
+router.post('/user/remove',verifyToken, async (req, res) => {
   const { userId, selectedUserId } = req.body;
 
   try {
@@ -1965,7 +1965,7 @@ router.post('/user/remove', async (req, res) => {
 
 
 // GET /transactions?page=1&limit=10
-router.get('/transactions', async (req, res) => {
+router.get('/transactions',verifyToken, async (req, res) => {
   const { userId } = req.query;
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 3;
@@ -1988,7 +1988,7 @@ router.get('/transactions', async (req, res) => {
 });
 
 
-router.get("/usersall", async (req, res) => {
+router.get("/usersall",verifyToken, async (req, res) => {
   try {
     const users = await OdinCircledbModel.find();
 
@@ -2000,7 +2000,7 @@ router.get("/usersall", async (req, res) => {
 });
 
 
-router.get("/users", async (req, res) => {
+router.get("/users",verifyToken, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1; 
     const limit = parseInt(req.query.limit) || 1; 
@@ -2018,18 +2018,9 @@ router.get("/users", async (req, res) => {
   }
 });
 
-// router.get('/usersAll', async (req, res) => {
-//   try {
-//     const users = await OdinCircledbModel.find({}, 'fullName'); // Fetch only fullName
-//     res.json(users); // Send the array of users with fullName
-//   } catch (error) {
-//     console.error('Error fetching users:', error);
-//     res.status(500).json({ error: 'Internal Server Error' });
-//   }
-// });
 
 
-router.get('/user/friends/:userId', async (req, res) => {
+router.get('/user/friends/:userId',verifyToken, async (req, res) => {
   const { userId } = req.params;
   let { page = 1, limit = 10 } = req.query;
 
@@ -2083,7 +2074,7 @@ router.get('/user/friends/:userId', async (req, res) => {
 
 
 // Route to get a user by ID and return their verification status
-router.get('/userverified/:userId', async (req, res) => {
+router.get('/userverified/:userId',verifyToken, async (req, res) => {
   const { userId } = req.params;
 
   try {
@@ -2104,7 +2095,7 @@ router.get('/userverified/:userId', async (req, res) => {
 
  
 // routes/winners.js
-router.get('/winnerstoday', async (req, res) => {
+router.get('/winnerstoday',verifyToken, async (req, res) => {
   try {
     // Fetch all winners without a date filter
     const allWinners = await WinnerModel.find({});
@@ -2118,7 +2109,7 @@ router.get('/winnerstoday', async (req, res) => {
 
 
 
-router.put('/withdrawAuth/:userId', async (req, res) => {
+router.put('/withdrawAuth/:userId',verifyToken, async (req, res) => {
   const { userId } = req.params; 
   const { bvn, phone, lastName, firstName } = req.body; 
 
@@ -2167,7 +2158,7 @@ router.put('/withdrawAuth/:userId', async (req, res) => {
 
 
 
-router.get('/user/:userId/details', async (req, res) => {
+router.get('/user/:userId/details',verifyToken, async (req, res) => {
   const { userId } = req.params;
 
   try {
@@ -2190,7 +2181,7 @@ router.get('/user/:userId/details', async (req, res) => {
   }
 });
 
-router.post('/user/:userId/balancetopup', async (req, res) => {
+router.post('/user/:userId/balancetopup',verifyToken, async (req, res) => {
   const { userId } = req.params;
   const { amount, tx_ref, status} = req.body;
 
@@ -2219,7 +2210,7 @@ router.post('/user/:userId/balancetopup', async (req, res) => {
 });
 
 
-router.get('/user/:userId/amounts', async (req, res) => {
+router.get('/user/:userId/amounts',verifyToken, async (req, res) => {
   const { userId } = req.params;
 
   try {
@@ -2244,7 +2235,7 @@ router.get('/user/:userId/amounts', async (req, res) => {
 });
 
 // Route to search users
-router.get('/users/search', async (req, res) => {
+router.get('/users/search',verifyToken, async (req, res) => {
   const { query, page = 1, limit = 10 } = req.query;
 
   if (!query) {
@@ -2276,7 +2267,7 @@ router.get('/users/search', async (req, res) => {
 });
 
 
-router.get('/getBets', async (req, res) => {
+router.get('/getBets',verifyToken, async (req, res) => {
   try {
     const bets = await BetModel.find(); // Fetch all bets
     res.status(200).json(bets);
@@ -2287,7 +2278,7 @@ router.get('/getBets', async (req, res) => {
 });
 
 // Route to check if a room exists by roomId
-router.get('/room/exists/:roomId', async (req, res) => {
+router.get('/room/exists/:roomId',verifyToken, async (req, res) => {
   const { roomId } = req.params;
 
   try {
@@ -2306,7 +2297,7 @@ router.get('/room/exists/:roomId', async (req, res) => {
 
 
 // Route to fetch room details by roomId
-router.get('/room/details/:roomId', async (req, res) => {
+router.get('/room/details/:roomId',verifyToken, async (req, res) => {
   const { roomId } = req.params;
 
   try {
@@ -2324,7 +2315,7 @@ router.get('/room/details/:roomId', async (req, res) => {
 });
 
 
-router.get('/room/existsdice/:roomId', async (req, res) => {
+router.get('/room/existsdice/:roomId',verifyToken, async (req, res) => {
   const { roomId } = req.params;
 
   try {
@@ -2343,7 +2334,7 @@ router.get('/room/existsdice/:roomId', async (req, res) => {
 
 // Route to fetch room details by roomId
 // Route to fetch room details by roomId
-router.get('/room/detailsdice/:roomId', async (req, res) => {
+router.get('/room/detailsdice/:roomId',verifyToken, async (req, res) => {
   const { roomId } = req.params;
 
   try {
@@ -2361,7 +2352,7 @@ router.get('/room/detailsdice/:roomId', async (req, res) => {
 });
 
 
-router.get('/getBetsDice', async (req, res) => {
+router.get('/getBetsDice',verifyToken, async (req, res) => {
   try {
     const bets = await BetModelDice.find(); // Fetch all bets
     res.status(200).json(bets);
@@ -2371,7 +2362,7 @@ router.get('/getBetsDice', async (req, res) => {
   }
 });
 
-router.get('/getBetsCoin', async (req, res) => {
+router.get('/getBetsCoin',verifyToken, async (req, res) => {
   try {
     const bets = await BetModelCoin.find(); // Fetch all bets
     res.status(200).json(bets);
@@ -2381,7 +2372,7 @@ router.get('/getBetsCoin', async (req, res) => {
   }
 });
 
-router.get('/getBetsRock', async (req, res) => {
+router.get('/getBetsRock',verifyToken, async (req, res) => {
   try {
     const bets = await BetModelRock.find(); // Fetch all bets
     res.status(200).json(bets);
@@ -2391,7 +2382,7 @@ router.get('/getBetsRock', async (req, res) => {
   }
 });
 
-router.get('/getBetsQuiz', async (req, res) => {
+router.get('/getBetsQuiz',verifyToken, async (req, res) => {
   try {
     const bets = await BetModelQuiz.find(); // Fetch all bets
     res.status(200).json(bets);
@@ -2402,7 +2393,7 @@ router.get('/getBetsQuiz', async (req, res) => {
 });
 
 // Route to get the referral list for a specific user by userId
-router.get('/referrals/:userId', async (req, res) => {
+router.get('/referrals/:userId',verifyToken, async (req, res) => {
   try {
     const { userId } = req.params; // Extract the userId from the URL parameters
 
@@ -2437,7 +2428,7 @@ router.get('/referrals/:userId', async (req, res) => {
   }
 });
 
-router.put('/update-withdraw-status', async (req, res) => {
+router.put('/update-withdraw-status',verifyToken, async (req, res) => {
   const { userId, withdrawConfirmed, expirationTime } = req.body;
 
   try {
@@ -2469,7 +2460,7 @@ router.put('/update-withdraw-status', async (req, res) => {
 });
 
 
-router.get('/get-withdraw-status', async (req, res) => {
+router.get('/get-withdraw-status',verifyToken, async (req, res) => {
   const { userId } = req.query;
 
   try {
@@ -2487,7 +2478,7 @@ router.get('/get-withdraw-status', async (req, res) => {
   }
 });
 
-router.get('/batches', async (req, res) => {
+router.get('/batches',verifyToken, async (req, res) => {
   const { userId } = req.query; // Note: from query string, not URL path
   console.log('Fetching all batches...');
   try {
@@ -2500,7 +2491,7 @@ router.get('/batches', async (req, res) => {
 });
 
 // Update PlayersInRoom
-router.post('/updatePlayersInRoom', async (req, res) => {
+router.post('/updatePlayersInRoom',verifyToken, async (req, res) => {
   const { batchId, userId } = req.body;
 
   try {
@@ -2534,7 +2525,7 @@ router.post('/updatePlayersInRoom', async (req, res) => {
 
 
 // Remove userId if validation fails
-router.post('/removeUserFromBatch', async (req, res) => {
+router.post('/removeUserFromBatch',verifyToken, async (req, res) => {
   const { batchId, userId } = req.body;
 
   try {
@@ -2556,7 +2547,7 @@ router.post('/removeUserFromBatch', async (req, res) => {
   }
 });
 
-router.post('/addTime', async (req, res) => {
+router.post('/addTime',verifyToken, async (req, res) => {
   const { userId, cost } = req.body;
 
   try {
@@ -2593,7 +2584,7 @@ router.post('/addTime', async (req, res) => {
   }
 });
 
-router.post('/placeBet', async (req, res) => {
+router.post('/placeBet',verifyToken, async (req, res) => {
   const { batchId, userId, betAmount } = req.body; // Expect batchId, userId, and betAmount
 
   try {
@@ -2638,7 +2629,7 @@ router.post('/placeBet', async (req, res) => {
 
 
 // Fetch questions based on the batch level (level1 for Batch A, level2 for Batch B)
-router.get('/questions/:level', async (req, res) => {
+router.get('/questions/:level',verifyToken, async (req, res) => {
   const { level } = req.params; // "level1" or "level2"
   
 // Ensure that level is valid
@@ -2724,7 +2715,7 @@ if (!/^Level(10|[1-9])$/.test(level)) {
 //   }
 // });
 
-router.post('/saveCorrectAnswers', async (req, res) => {
+router.post('/saveCorrectAnswers',verifyToken, async (req, res) => {
   const {
     batchId,
     batchName,
@@ -2791,7 +2782,7 @@ router.post('/saveCorrectAnswers', async (req, res) => {
 });
 
 
-router.post('/api/verify-transaction', async (req, res) => {
+router.post('/api/verify-transaction',verifyToken, async (req, res) => {
   const { transaction_id, tx_ref, userId, amount,email } = req.body;
 
   if (!transaction_id || !tx_ref || !userId || !amount || !email) {
@@ -2893,7 +2884,7 @@ router.post('/api/verify-transaction', async (req, res) => {
   }
 });
 
-router.get('/faceoffbatches', async (req, res) => {
+router.get('/faceoffbatches',verifyToken, async (req, res) => {
   console.log('Fetching all faceoffbatches...');
   try {
       const batches = await FaceOffModel.find();
@@ -2904,7 +2895,7 @@ router.get('/faceoffbatches', async (req, res) => {
   }
 });
 
-router.put('/faceoffbatches/:id', async (req, res) => {
+router.put('/faceoffbatches/:id',verifyToken, async (req, res) => {
   try {
     const { joinedUsers } = req.body;
     const { id } = req.params; // Get batch id from the URL
@@ -2928,7 +2919,7 @@ router.put('/faceoffbatches/:id', async (req, res) => {
   }
 });
 
-router.get('/faceoffanswer', async (req, res) => {
+router.get('/faceoffanswer',verifyToken, async (req, res) => {
   try {
     const { batchId, page = 1, limit = 10 } = req.query;
 
@@ -2968,7 +2959,7 @@ router.get('/faceoffanswer', async (req, res) => {
 
 // Sample route to fetch batch answers
 // GET /api/batch-answers?page=1&limit=10
-router.get('/api/batch-answers', async (req, res) => {
+router.get('/api/batch-answers',verifyToken, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
@@ -2994,7 +2985,7 @@ router.get('/api/batch-answers', async (req, res) => {
 
 
 
-router.post('/faceoffanswers', async (req, res) => {
+router.post('/faceoffanswers',verifyToken, async (req, res) => {
   const {
     batchId,
     batchName,
@@ -3063,7 +3054,7 @@ router.post('/faceoffanswers', async (req, res) => {
 
 
 
-router.post('/intentToBet', async (req, res) => {
+router.post('/intentToBet',verifyToken, async (req, res) => {
   const { batchId, userId, betAmount } = req.body;
 
   try {
@@ -3085,7 +3076,7 @@ router.post('/intentToBet', async (req, res) => {
 
 
 // 2. When room is full – d
-router.post('/deductBetsForRoom', async (req, res) => {
+router.post('/deductBetsForRoom',verifyToken, async (req, res) => {
   const { batchId } = req.body;
 
   try {

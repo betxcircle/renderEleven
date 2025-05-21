@@ -2913,26 +2913,35 @@ router.put('/faceoffbatches/:id', async (req, res) => {
 
 router.get('/faceoffanswer', async (req, res) => {
   try {
-    const { batchId } = req.query;
-
-    let record;
+    const { batchId, page = 1, limit = 10 } = req.query;
 
     if (batchId) {
-      record = await FaceOffAnswer.findOne({ batchId });
+      const record = await FaceOffAnswer.findOne({ batchId });
       if (!record) {
         return res.status(404).json({ message: 'Batch not found' });
       }
-    } else {
-      // If no batchId is provided, return all records or the latest one
-      record = await FaceOffAnswer.find().sort({ createdAt: -1 }).limit(10); // Example: latest 10
+      return res.status(200).json({ data: [record], total: 1, currentPage: 1, totalPages: 1 });
     }
 
-    res.status(200).json(record);
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const total = await FaceOffAnswer.countDocuments();
+    const records = await FaceOffAnswer.find()
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    res.status(200).json({
+      data: records,
+      currentPage: parseInt(page),
+      totalPages: Math.ceil(total / limit),
+      totalItems: total,
+    });
   } catch (error) {
     console.error('Error fetching faceoff answers:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
+
 
 
 

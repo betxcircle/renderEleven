@@ -694,7 +694,6 @@ async function sendOTPByEmail(newUser, otp) {
 
 router.get('/referral/:userId',verifyToken, async (req, res) => {
   const { userId } = req.params;
-    console.log('Incoming headers:', req.headers);
 
   try {
     // Step 1: Find the user by ID

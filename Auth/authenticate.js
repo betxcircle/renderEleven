@@ -4,7 +4,7 @@ const rateLimit = require('express-rate-limit');
 const axios = require("axios");
 const mongoose = require('mongoose');
 const verifyToken = require('../k6/verifyToken'); // path may vary
-const SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key';
+const JWT_SECRET = process.env.JWT_SECRET || 'your_secret_key';
 const OdinCircledbModel = require('../models/odincircledb');
 const WalletModel = require('../models/Walletmodel');
 const AddTimeLog = require('../models/AddTimeLog');
@@ -420,7 +420,7 @@ router.post('/login', async (req, res) => {
       // Compare provided password with hashed password in the database
       const isMatch = await bcrypt.compare(password, user.password);
      // Create JWT
-    const token = jwt.sign({ userId: user._id }, SECRET_KEY, { expiresIn: '1h' });
+    const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1h' });
 
       if (isMatch) {
         res.status(200).json({ status: 'success', user: user , token });

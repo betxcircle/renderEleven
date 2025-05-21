@@ -83,36 +83,53 @@ const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
 
 
 const PAYSTACK_BASE_URL = process.env.PAYSTACK_BASE_URL;
+const PAYSTACK_BASE = process.env.PAYSTACK_BASE;
 
 const paystackHeaders = {
   Authorization: `Bearer ${PAYSTACK_SECRET_KEY}`,
   "Content-Type": "application/json",
 };
 
-// Fetch all games won by user
+// GET /userwinner/:userId?page=1&limit=10
 router.get('/userwinner/:userId', async (req, res) => {
+  const { page = 1, limit = 10 } = req.query;
+
   try {
-    const wins = await WinnerModel.find({ winnerName: req.params.userId });
-    res.json(wins);
+    const wins = await WinnerModel.find({ winnerName: req.params.userId })
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(Number(limit));
+
+    const total = await WinnerModel.countDocuments({ winnerName: req.params.userId });
+
+    res.json({ data: wins, total });
   } catch (error) {
     res.status(500).json({ message: 'Error fetching wins' });
   }
 });
 
-// Fetch all games lost by user
-// Fetch all games lost by user
+// GET /userloser/:userId?page=1&limit=10
 router.get('/userloser/:userId', async (req, res) => {
+  const { page = 1, limit = 10 } = req.query;
+
   try {
-    const losses = await LoserModel.find({ loserName: req.params.userId });
-    res.json(losses);
+    const losses = await LoserModel.find({ loserName: req.params.userId })
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(Number(limit));
+
+    const total = await LoserModel.countDocuments({ loserName: req.params.userId });
+
+    res.json({ data: losses, total });
   } catch (error) {
-    console.error('Error fetching losses:', error); // Log to server console
-    res.status(500).json({ 
-      message: 'Error fetching losses', 
-      error: error.message // Include error message in response
+    console.error('Error fetching losses:', error);
+    res.status(500).json({
+      message: 'Error fetching losses',
+      error: error.message
     });
   }
 });
+
 
 
 router.post("/paystack/withdraw", async (req, res) => {
@@ -273,7 +290,7 @@ router.post('/paystack/initialize', async (req, res) => {
       'https://api.paystack.co/transaction/initialize',
       { email, 
        amount: paystackAmount ,
-       callback_url: "https://rendereleven.onrender.com/paystack/callback", // ✅ Change to an actual callback route
+       callback_url: `${PAYSTACK_BASE}/paystack/callback`, // ✅ Change to an actual callback route
        metadata: { userId } // ✅ Attach userId to be retrieved later
       },
       { headers: { Authorization: `Bearer ${PAYSTACK_SECRET_KEY}` } }

@@ -2471,6 +2471,7 @@ router.get('/get-withdraw-status', async (req, res) => {
 });
 
 router.get('/batches', async (req, res) => {
+  const { userId } = req.query; // Note: from query string, not URL path
   console.log('Fetching all batches...');
   try {
       const batches = await BatchModel.find();

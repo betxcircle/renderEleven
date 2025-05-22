@@ -213,7 +213,7 @@ router.post("/paystack/withdraw",verifyToken, async (req, res) => {
       { headers: paystackHeaders }
     );
 
-    console.log("Paystack Response:", response.data); // Log the full response
+    //console.log("Paystack Response:", response.data); // Log the full response
 
     // Check if the transfer was at least queued
     if (response.data.status === true && response.data.data.status === "pending") {
@@ -249,7 +249,7 @@ router.post("/paystack/withdraw",verifyToken, async (req, res) => {
       user.wallet.cashoutbalance -= withdrawalAmount;
       await user.save();
 
-      console.log(`New balance after withdrawal: ${user.wallet.cashoutbalance}`);
+      // console.log(`New balance after withdrawal: ${user.wallet.cashoutbalance}`);
 
       // Save the transaction record
       const transaction = new DebitModel({
@@ -261,7 +261,7 @@ router.post("/paystack/withdraw",verifyToken, async (req, res) => {
       });
       await transaction.save();
 
-      console.log("Transaction saved successfully:", transaction);
+      // console.log("Transaction saved successfully:", transaction);
 
       return res.json({
         success: true,
@@ -283,7 +283,7 @@ router.post('/paystack/initialize',verifyToken, async (req, res) => {
   const { email, amount, userId } = req.body;
   const paystackAmount = amount * 100; // Convert to kobo
 
-  console.log("Received payment request:", { email, amount });
+  // console.log("Received payment request:", { email, amount });
 
   try {
     const response = await axios.post(
@@ -296,7 +296,7 @@ router.post('/paystack/initialize',verifyToken, async (req, res) => {
       { headers: { Authorization: `Bearer ${PAYSTACK_SECRET_KEY}` } }
     );
 
-    console.log("Paystack response:", response.data);
+    // console.log("Paystack response:", response.data);
 
     res.json(response.data);
   } catch (error) {
@@ -336,7 +336,7 @@ router.get("/paystack/callback", async (req, res) => {
         { headers: { "Content-Type": "application/json" } }
       );
 
-      console.log("Backend verification response:", verifyResponse.data);
+      // console.log("Backend verification response:", verifyResponse.data);
 
       return res.redirect(`https://betxcircle.com/payment-success?reference=${reference}`);
     } else {

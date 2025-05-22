@@ -2705,7 +2705,7 @@ if (!/^Level(10|[1-9])$/.test(level)) {
 //   }
 // });
 
-router.post('/saveCorrectAnswers',verifyToken, async (req, res) => {
+router.post('/saveCorrectAnswers', async (req, res) => {
   const {
     batchId,
     batchName,
@@ -2986,7 +2986,7 @@ router.get('/api/batch-answers',verifyToken, async (req, res) => {
 
 
 
-router.post('/faceoffanswers',verifyToken, async (req, res) => {
+router.post('/faceoffanswers' async (req, res) => {
   const {
     batchId,
     batchName,
@@ -3055,7 +3055,7 @@ router.post('/faceoffanswers',verifyToken, async (req, res) => {
 
 
 
-router.post('/intentToBet',verifyToken, async (req, res) => {
+router.post('/intentToBet', async (req, res) => {
   const { batchId, userId, betAmount } = req.body;
 
   try {
@@ -3077,7 +3077,7 @@ router.post('/intentToBet',verifyToken, async (req, res) => {
 
 
 // 2. When room is full – d
-router.post('/deductBetsForRoom',verifyToken, async (req, res) => {
+router.post('/deductBetsForRoom', async (req, res) => {
   const { batchId } = req.body;
 
   try {

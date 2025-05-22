@@ -2986,7 +2986,7 @@ router.get('/api/batch-answers',verifyToken, async (req, res) => {
 
 
 
-router.post('/faceoffanswers' async (req, res) => {
+router.post('/faceoffanswers', async (req, res) => {
   const {
     batchId,
     batchName,

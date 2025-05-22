@@ -824,7 +824,7 @@ const transporter = nodemailer.createTransport({
 const generateCode = () => Math.floor(100000 + Math.random() * 900000).toString();
 const generateToken = (email) => jwt.sign({ email }, jwtSecret, { expiresIn: '1h' });
 
-router.post('/register-device',verifyToken, async (req, res) => {
+router.post('/register-device', async (req, res) => {
   const { expoPushToken, userId } = req.body;
 
   // Check if expoPushToken and userId are not null

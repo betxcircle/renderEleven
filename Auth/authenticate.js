@@ -2619,7 +2619,7 @@ router.post('/placeBet',verifyToken, async (req, res) => {
 
 
 // Fetch questions based on the batch level (level1 for Batch A, level2 for Batch B)
-router.get('/questions/:level',verifyToken, async (req, res) => {
+router.get('/questions/:level', async (req, res) => {
   const { level } = req.params; // "level1" or "level2"
   
 // Ensure that level is valid
@@ -2874,7 +2874,7 @@ router.post('/api/verify-transaction',verifyToken, async (req, res) => {
   }
 });
 
-router.get('/batches',verifyToken, async (req, res) => {
+router.get('/batches', async (req, res) => {
   console.log('Fetching all batches...');
   try {
       const batches = await BatchModel.find();

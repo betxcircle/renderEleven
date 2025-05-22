@@ -1875,7 +1875,7 @@ router.get('/user/:userId/amount',verifyToken, async (req, res) => {
 
 
 // Route to get the push token for a given user ID
-router.get('/getPushToken/:recipientId',verifyToken, async (req, res) => {
+router.get('/getPushToken/:recipientId', async (req, res) => {
   const { recipientId } = req.params;
 
   if (!recipientId || !mongoose.Types.ObjectId.isValid(recipientId)) {
@@ -2478,17 +2478,7 @@ router.get('/get-withdraw-status',verifyToken, async (req, res) => {
   }
 });
 
-router.get('/batches',verifyToken, async (req, res) => {
-  const { userId } = req.query; // Note: from query string, not URL path
-  console.log('Fetching all batches...');
-  try {
-      const batches = await BatchModel.find();
-      res.json(batches);
-  } catch (err) {
-      console.error('Error fetching batches:', err.message);
-      res.status(500).json({ error: err.message });
-  }
-});
+
 
 // Update PlayersInRoom
 router.post('/updatePlayersInRoom',verifyToken, async (req, res) => {
@@ -2881,6 +2871,17 @@ router.post('/api/verify-transaction',verifyToken, async (req, res) => {
   } catch (error) {
     console.error('Error verifying transaction:', error.message);
     return res.status(500).json({ error: 'Internal Server Error', details: error.message });
+  }
+});
+
+router.get('/batches',verifyToken, async (req, res) => {
+  console.log('Fetching all batches...');
+  try {
+      const batches = await BatchModel.find();
+      res.json(batches);
+  } catch (err) {
+      console.error('Error fetching batches:', err.message);
+      res.status(500).json({ error: err.message });
   }
 });
 

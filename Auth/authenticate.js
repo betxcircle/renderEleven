@@ -135,7 +135,7 @@ router.get('/userloser/:userId',verifyToken, async (req, res) => {
 router.post("/paystack/withdraw",verifyToken, async (req, res) => {
   const { name, account_number, bank_name, amount, currency, otp, userId, title, message, fullName } = req.body;
 
-     console.log('userId, otp, name, fullName')
+     //console.log('userId, otp, name, fullName')
 
   if (!name || !account_number || !bank_name || !amount, !userId) {
     return res.status(400).json({ error: "All fields are required" });
@@ -320,7 +320,7 @@ router.get("/paystack/callback", async (req, res) => {
 
     const { status, data } = response.data;
     if (status && data.status === "success") {
-      console.log("Payment verified:", data);
+     
 
       // ✅ Extract userId from metadata
       const userId = data.metadata?.userId;
@@ -420,7 +420,7 @@ router.post('/login', async (req, res) => {
       // Compare provided password with hashed password in the database
       const isMatch = await bcrypt.compare(password, user.password);
      // Create JWT
-    const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ userId: user._id }, JWT_SECRET);
 
       if (isMatch) {
         res.status(200).json({ status: 'success', user: user , token });

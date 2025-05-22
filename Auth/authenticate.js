@@ -308,7 +308,7 @@ router.post('/paystack/initialize',verifyToken, async (req, res) => {
 
 
 // Callback URL for Paystack
-router.get("/paystack/callback",verifyToken, async (req, res) => {
+router.get("/paystack/callback", async (req, res) => {
   try {
     const { reference } = req.query;
     if (!reference) return res.status(400).json({ error: "No reference provided" });
@@ -350,7 +350,7 @@ router.get("/paystack/callback",verifyToken, async (req, res) => {
 
 
  // Verification route (Called by the callback automatically)
-router.post("/paystack/verify",verifyToken, async (req, res) => {
+router.post("/paystack/verify", async (req, res) => {
   const { reference, userId } = req.body;
 
   try {

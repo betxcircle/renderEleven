@@ -2716,9 +2716,10 @@ router.post('/saveCorrectAnswers', async (req, res) => {
     timestamp,
   } = req.body;
 
-  if (!Array.isArray(answers) || answers.length === 0) {
-    return res.status(400).json({ message: 'Answers array is required.' });
+  if (!Array.isArray(answers)) {
+    return res.status(400).json({ message: 'Answers must be an array.' });
   }
+
 
   try {
     let batchAnswer = await BatchAnswer.findOne({ batchId });
@@ -2998,9 +2999,10 @@ router.post('/faceoffanswers', async (req, res) => {
   } = req.body;
    console.log('Received data:', req.body); // ⬅️ Add this
 
-   if (!Array.isArray(answers) || answers.length === 0) {
-    return res.status(400).json({ message: 'Answers array is required.' });
-  }
+if (!Array.isArray(answers)) {
+  return res.status(400).json({ message: 'Answers must be an array.' });
+}
+
 
   try {
     let faceOffAnswer = await FaceOffAnswer.findOne({ batchId });

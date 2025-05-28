@@ -28,6 +28,7 @@ const BatchSchema = new mongoose.Schema({
     required: true,
     default: 0,
   },
+    roomLocked: { type: Boolean, default: false }, // 🔐 Add this
   PlayersInRoom: {
     type: Number,
     default: 0,

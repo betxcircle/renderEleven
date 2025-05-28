@@ -3061,6 +3061,13 @@ router.post('/intentToBet', async (req, res) => {
   const { batchId, userId, betAmount } = req.body;
 
   try {
+      const batch = await BatchModel.findById(batchId);
+    if (!batch) return res.status(404).json({ message: 'Batch not found' });
+
+    // Prevent joining if locked
+    if (batch.roomLocked) {
+      return res.status(400).json({ message: 'Room is already full or locked' });
+    }
     // Prevent duplicate intent
     const existingIntent = await BetIntent.findOne({ batchId, userId });
     if (existingIntent) {
@@ -3069,6 +3076,13 @@ router.post('/intentToBet', async (req, res) => {
 
     const intent = new BetIntent({ batchId, userId, betAmount });
     await intent.save();
+
+     // Optionally: track how many have joined
+    const totalIntents = await BetIntent.countDocuments({ batchId });
+    if (totalIntents >= batch.NumberPlayers) {
+      batch.roomLocked = true;
+      await batch.save(); // Lock the room immediately
+    }
 
     res.json({ message: 'Intent registered' });
   } catch (err) {
@@ -3132,6 +3146,7 @@ for (const intent of intents) {
 
     // Lock or start the game
     batch.status = 'started';
+    batch.roomLocked = true; // 🔐 make sure it is locked
     await batch.save();
 
     res.json({ message: 'Bets deducted, game ready to start' });

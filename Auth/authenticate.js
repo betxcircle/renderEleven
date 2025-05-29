@@ -3094,6 +3094,7 @@ router.post('/intentToBet', async (req, res) => {
 
 // 2. When room is full – d
 router.post('/deductBetsForRoom', async (req, res) => {
+    console.log('🔁 /deductBetsForRoom hit with:', req.body);
   const { batchId } = req.body;
 
   try {

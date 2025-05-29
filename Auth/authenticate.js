@@ -3061,7 +3061,10 @@ router.post('/intentToBet', async (req, res) => {
   const { batchId, userId, betAmount } = req.body;
 
   try {
-      const batch = await BatchModel.findById(batchId);
+    const batchObjectId = new mongoose.Types.ObjectId(batchId);
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+    
+      const batch = await BatchModel.findById(batchObjectId);
     if (!batch) return res.status(404).json({ message: 'Batch not found' });
 
     // Prevent joining if locked
@@ -3069,16 +3072,20 @@ router.post('/intentToBet', async (req, res) => {
       return res.status(400).json({ message: 'Room is already full or locked' });
     }
     // Prevent duplicate intent
-    const existingIntent = await BetIntent.findOne({ batchId, userId });
+    const existingIntent = await BetIntent.findOne({ batchId: batchObjectId, userId: userObjectId });
     if (existingIntent) {
       return res.json({ message: 'User already joined' });
     }
 
-    const intent = new BetIntent({ batchId, userId, betAmount });
+const intent = new BetIntent({
+  batchId: new mongoose.Types.ObjectId(batchId),
+  userId: new mongoose.Types.ObjectId(userId),
+  betAmount
+});
     await intent.save();
 
      // Optionally: track how many have joined
-    const totalIntents = await BetIntent.countDocuments({ batchId });
+    const totalIntents = await BetIntent.countDocuments({  batchId: batchObjectId });
     if (totalIntents >= batch.NumberPlayers) {
       batch.roomLocked = true;
       await batch.save(); // Lock the room immediately
@@ -3098,14 +3105,16 @@ router.post('/deductBetsForRoom', async (req, res) => {
   console.log('🔁 /deductBetsForRoom hit with:', req.body);
 
   try {
-    const batch = await BatchModel.findById(batchId);
+    const batchObjectId = new mongoose.Types.ObjectId(batchId); // 👈 Convert to ObjectId
+
+    const batch = await BatchModel.findById(batchObjectId);
     if (!batch) {
       console.log('❌ Batch not found');
       return res.status(404).json({ message: 'Batch not found' });
     }
     console.log('✅ Batch found:', batch._id);
 
-    const intents = await BetIntent.find({ batchId });
+    const intents = await BetIntent.find({ batchId: batchObjectId }); // 👈 Use ObjectId
     console.log('🎯 Found bet intents:', intents.length);
 
     if (intents.length < batch.NumberPlayers) {
@@ -3138,6 +3147,7 @@ router.post('/deductBetsForRoom', async (req, res) => {
       }
     }
 
+    // Deduct balances and update batch
     for (const intent of intents) {
       const alreadyDeducted = batch.betsAmountPlayer.some(
         (b) => String(b.userId) === String(intent.userId)

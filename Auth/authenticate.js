@@ -3059,44 +3059,54 @@ if (!Array.isArray(answers)) {
 
 router.post('/intentToBet', async (req, res) => {
   const { batchId, userId, betAmount } = req.body;
+  console.log('📥 /intentToBet called with:', req.body);
 
   try {
     const batchObjectId = new mongoose.Types.ObjectId(batchId);
     const userObjectId = new mongoose.Types.ObjectId(userId);
     
-      const batch = await BatchModel.findById(batchObjectId);
-    if (!batch) return res.status(404).json({ message: 'Batch not found' });
+    const batch = await BatchModel.findById(batchObjectId);
+    if (!batch) {
+      console.log('❌ Batch not found');
+      return res.status(404).json({ message: 'Batch not found' });
+    }
+    console.log('✅ Batch found:', batch._id);
 
-    // Prevent joining if locked
     if (batch.roomLocked) {
+      console.log('🔒 Room is locked');
       return res.status(400).json({ message: 'Room is already full or locked' });
     }
-    // Prevent duplicate intent
+
     const existingIntent = await BetIntent.findOne({ batchId: batchObjectId, userId: userObjectId });
     if (existingIntent) {
+      console.log('🔁 User already joined:', userObjectId);
       return res.json({ message: 'User already joined' });
     }
 
-const intent = new BetIntent({
-  batchId: new mongoose.Types.ObjectId(batchId),
-  userId: new mongoose.Types.ObjectId(userId),
-  betAmount
-});
+    const intent = new BetIntent({
+      batchId: batchObjectId,
+      userId: userObjectId,
+      betAmount
+    });
     await intent.save();
+    console.log('✅ Bet intent saved:', intent);
 
-     // Optionally: track how many have joined
-    const totalIntents = await BetIntent.countDocuments({  batchId: batchObjectId });
+    const totalIntents = await BetIntent.countDocuments({ batchId: batchObjectId });
+    console.log('📊 Total intents for batch:', totalIntents);
+
     if (totalIntents >= batch.NumberPlayers) {
       batch.roomLocked = true;
-      await batch.save(); // Lock the room immediately
+      await batch.save();
+      console.log('🔐 Room locked');
     }
 
     res.json({ message: 'Intent registered' });
   } catch (err) {
-    console.error(err);
+    console.error('❌ Error in /intentToBet:', err);
     res.status(500).json({ message: 'Server error' });
   }
 });
+
 
 
 // 2. When room is full – d

@@ -3094,27 +3094,32 @@ router.post('/intentToBet', async (req, res) => {
 
 // 2. When room is full – d
 router.post('/deductBetsForRoom', async (req, res) => {
-    console.log('🔁 /deductBetsForRoom hit with:', req.body);
   const { batchId } = req.body;
+  console.log('🔁 /deductBetsForRoom hit with:', req.body);
 
   try {
     const batch = await BatchModel.findById(batchId);
-    if (!batch) return res.status(404).json({ message: 'Batch not found' });
-
-    if (batch.roomLocked) {
-      return res.status(409).json({ message: 'Room already started or locked' });
+    if (!batch) {
+      console.log('❌ Batch not found');
+      return res.status(404).json({ message: 'Batch not found' });
     }
+    console.log('✅ Batch found:', batch._id);
 
     const intents = await BetIntent.find({ batchId });
+    console.log('🎯 Found bet intents:', intents.length);
 
     if (intents.length < batch.NumberPlayers) {
+      console.log('⏳ Room not full yet');
       return res.status(400).json({ message: 'Room is not full yet' });
     }
 
-    // Pre-validate all users
+    // Validate users and their balance
     for (const intent of intents) {
+      console.log(`🔍 Validating user ${intent.userId}`);
+
       const user = await OdinCircledbModel.findById(intent.userId);
       if (!user) {
+        console.log(`❌ User ${intent.userId} not found`);
         return res.status(404).json({ message: `User ${intent.userId} not found` });
       }
 
@@ -3122,48 +3127,52 @@ router.post('/deductBetsForRoom', async (req, res) => {
       const requiredBet = parseFloat(batch.betAmount);
       const userBet = parseFloat(intent.betAmount);
 
-      if (isNaN(userBet) || Math.abs(userBet - requiredBet) > 0.01) {
-        return res.status(400).json({ 
-          message: `Invalid bet for user ${intent.userId}. Expected ₦${requiredBet}, got ₦${userBet}` 
-        });
+      if (isNaN(userBet) || userBet !== requiredBet) {
+        console.log(`❌ Invalid bet amount for user ${intent.userId}: ${userBet}`);
+        return res.status(400).json({ message: `Invalid bet for user ${intent.userId}` });
       }
 
       if (userBalance < userBet) {
-        return res.status(400).json({ 
-          message: `Insufficient balance for user ${intent.userId}. Balance: ₦${user.wallet.balance}, Required: ₦${userBet}` 
-        });
+        console.log(`❌ Insufficient balance for user ${intent.userId}`);
+        return res.status(400).json({ message: `Insufficient balance for user ${intent.userId}` });
       }
     }
 
-    // Deduct bets and update batch
-    await Promise.all(intents.map(async (intent) => {
+    for (const intent of intents) {
       const alreadyDeducted = batch.betsAmountPlayer.some(
         (b) => String(b.userId) === String(intent.userId)
       );
-      if (alreadyDeducted) return;
+      if (alreadyDeducted) {
+        console.log(`↪️ Already deducted for user ${intent.userId}, skipping...`);
+        continue;
+      }
 
       const user = await OdinCircledbModel.findById(intent.userId);
       const userBet = parseFloat(intent.betAmount);
+      console.log(`💸 Deducting ${userBet} from user ${user._id}`);
+
       user.wallet.balance -= userBet;
       await user.save();
+      console.log(`💾 Saved user ${user._id} new balance: ${user.wallet.balance}`);
 
       batch.betsAmountPlayer.push({
         userId: intent.userId,
         betsAmount: userBet,
       });
-    }));
+    }
 
     batch.status = 'started';
     batch.roomLocked = true;
     await batch.save();
+    console.log('🏁 Batch updated: started and locked');
 
-    res.json({ message: 'Bets deducted, game ready to start' });
+    return res.json({ message: 'Bets deducted, game ready to start' });
+
   } catch (error) {
-    console.error('Deduct error:', error);
-    res.status(500).json({ message: 'Server error during bet deduction' });
+    console.error('❌ Deduct error:', error);
+    return res.status(500).json({ message: 'Server error during bet deduction' });
   }
 });
-
 
 
 module.exports = router;

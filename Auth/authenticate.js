@@ -3151,10 +3151,10 @@ router.post('/deductBetsForRoom', async (req, res) => {
         return res.status(400).json({ message: `Invalid bet for user ${intent.userId}` });
       }
 
-      if (userBalance < userBet) {
-        console.log(`❌ Insufficient balance for user ${intent.userId}`);
-        return res.status(400).json({ message: `Insufficient balance for user ${intent.userId}` });
-      }
+      //if (userBalance < userBet) {
+        //console.log(`❌ Insufficient balance for user ${intent.userId}`);
+        //return res.status(400).json({ message: `Insufficient balance for user ${intent.userId}` });
+      //}
     }
 
     // Deduct balances and update batch

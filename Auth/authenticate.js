@@ -331,7 +331,7 @@ router.get("/paystack/callback", async (req, res) => {
 
       // ✅ Automatically call the verification route on the backend
       const verifyResponse = await axios.post(
-        "https://rendereleven.onrender.com/paystack/verify",
+        "https://rendereleven-giq9.onrender.com/paystack/verify",
         { reference, userId },
         { headers: { "Content-Type": "application/json" } }
       );

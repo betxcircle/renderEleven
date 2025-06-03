@@ -3117,7 +3117,19 @@ router.post('/deductBetsForRoom', async (req, res) => {
   try {
     const batchObjectId = new mongoose.Types.ObjectId(batchId); // 👈 Convert to ObjectId
 
-    const batch = await BatchModel.findById(batchObjectId);
+    //const batch = await BatchModel.findById(batchObjectId);
+    const batch = await BatchModel.findOneAndUpdate(
+  { _id: batchObjectId, isProcessing: { $ne: true } }, // Only proceed if not already processing
+  { isProcessing: true }, // Set lock
+  { new: true }
+);
+
+if (!batch) {
+  console.log('⚠️ Batch is already being processed');
+  return res.status(409).json({ message: 'Batch is already being processed' });
+}
+
+    
     if (!batch) {
       console.log('❌ Batch not found');
       return res.status(404).json({ message: 'Batch not found' });
@@ -3181,6 +3193,7 @@ router.post('/deductBetsForRoom', async (req, res) => {
       });
     }
 
+    batch.isProcessing = false;
     batch.status = 'started';
     batch.roomLocked = true;
     await batch.save();
@@ -3190,6 +3203,8 @@ router.post('/deductBetsForRoom', async (req, res) => {
 
   } catch (error) {
     console.error('❌ Deduct error:', error);
+    // Reset the lock if something fails
+   await BatchModel.findByIdAndUpdate(batchId, { isProcessing: false });
     return res.status(500).json({ message: 'Server error during bet deduction' });
   }
 });

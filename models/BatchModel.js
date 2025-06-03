@@ -33,6 +33,7 @@ const BatchSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  isProcessing: { type: Boolean, default: false },
   joinedUsers: [
     {
       userId: { type: String },

@@ -2158,28 +2158,34 @@ router.put('/withdrawAuth/:userId',verifyToken, async (req, res) => {
 
 
 
-router.get('/user/:userId/details',verifyToken, async (req, res) => {
+router.get('/user/:userId/details', verifyToken, async (req, res) => {
   const { userId } = req.params;
 
   try {
     const user = await OdinCircledbModel.findById(userId);
+
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
     res.json({
-      amount: user.wallet.balance,
+      amount: user.wallet?.balance || 0,
       email: user.email,
       phone: user.phone,
       bvn: user.bvn,
       firstName: user.firstName,
       lastName: user.lastName,
+      image: user.image,
+      wallet: user.wallet || null,
+      bankDetails: user.bankDetails || null,
+      referrals: user.referrals || [],
     });
   } catch (error) {
     console.error('Error fetching user details:', error);
     res.status(500).json({ message: 'An error occurred while fetching user details' });
   }
 });
+
 
 router.post('/user/:userId/balancetopup',verifyToken, async (req, res) => {
   const { userId } = req.params;
